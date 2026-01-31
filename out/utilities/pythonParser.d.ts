@@ -1,17 +1,29 @@
 /**
- * Python Function Parser
- * Uses line-by-line analysis with indentation tracking
+ * Multi-Language Code Parser
+ * Supports: Python, Java, Go, C, C++, JavaScript, TypeScript
  */
-export interface PythonFunction {
+export interface CodeParameter {
     name: string;
-    args: string;
-    body: string;
+    type: string;
+    defaultValue?: string;
+}
+export interface CodeFunction {
+    name: string;
+    parameters: CodeParameter[];
+    code: string;
     lineStart: number;
     lineEnd: number;
+    language: string;
 }
+export type PythonFunction = CodeFunction;
+export type PythonParameter = CodeParameter;
 /**
- * Parse Python source code and extract all function definitions
- * Uses indentation-based parsing (not regex for body capture)
+ * Detect language from file extension
  */
-export declare function parsePythonFunctions(sourceCode: string): PythonFunction[];
+export declare function detectLanguage(fileName: string): string;
+/**
+ * Parse functions based on language
+ */
+export declare function parseFunctions(sourceCode: string, fileName: string): CodeFunction[];
+export declare function parsePythonFunctions(sourceCode: string): CodeFunction[];
 //# sourceMappingURL=pythonParser.d.ts.map

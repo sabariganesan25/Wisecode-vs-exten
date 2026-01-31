@@ -1,14 +1,16 @@
 {
   "name": "sentinel-atomic",
-  "displayName": "Sentinel Atomic",
-  "description": "Atomic Code Visualization for Python",
-  "version": "0.0.1",
+  "displayName": "Sentinel Atomic Pro",
+  "description": "AI-Powered Agentic Security Workstation for Python",
+  "version": "1.0.0",
   "publisher": "sentinel",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Visualization"
+    "Visualization",
+    "Testing",
+    "Linters"
   ],
   "activationEvents": [
     "onLanguage:python"
@@ -20,7 +22,33 @@
         "command": "sentinel.openDashboard",
         "title": "Sentinel: Open Dashboard"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Sentinel Atomic Pro",
+      "properties": {
+        "sentinel.ibmApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "IBM Cloud API Key for Watsonx AI"
+        },
+        "sentinel.projectId": {
+          "type": "string",
+          "default": "",
+          "description": "IBM Watsonx Project ID"
+        },
+        "sentinel.region": {
+          "type": "string",
+          "default": "us-south",
+          "enum": [
+            "us-south",
+            "eu-de",
+            "eu-gb",
+            "jp-tok"
+          ],
+          "description": "IBM Cloud region"
+        }
+      }
+    }
   },
   "scripts": {
     "compile": "webpack --mode production",
@@ -41,6 +69,8 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@ibm-cloud/watsonx-ai": "^1.7.7",
+    "axios": "^1.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

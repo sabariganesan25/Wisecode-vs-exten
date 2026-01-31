@@ -21,432 +21,972 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, `/* Sentinel-Atomic Webview Styles
- * Uses VS Code CSS Variables for native look
- */
+___CSS_LOADER_EXPORT___.push([module.id, `/* ═══════════════════════════════════════════════════════════════
+   SENTINEL DASHBOARD - VS CODE NATIVE THEME
+   ═══════════════════════════════════════════════════════════════ */
 
-/* Reset and base */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+    --vscode-bg: #1e1e1e;
+    --vscode-sidebar: #252526;
+    --vscode-input: #3c3c3c;
+    --vscode-border: #3c3c3c;
+    --vscode-text: #cccccc;
+    --vscode-text-muted: #858585;
+    --vscode-blue: #0e639c;
+    --vscode-blue-hover: #1177bb;
+    --vscode-green: #89d185;
+    --vscode-yellow: #cca700;
+    --vscode-red: #f14c4c;
+    --vscode-purple: #c586c0;
+    --vscode-function: #dcdcaa;
+    --vscode-string: #ce9178;
+    --vscode-keyword: #569cd6;
+    --vscode-comment: #6a9955;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  font-family: var(--vscode-font-family);
-  font-size: var(--vscode-font-size);
-  color: var(--vscode-foreground);
-  background-color: var(--vscode-editor-background);
-  line-height: 1.5;
-  padding: 0;
-  margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    background: var(--vscode-bg);
+    color: var(--vscode-text);
+    line-height: 1.4;
 }
 
-/* Container */
-.sentinel-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
+/* App Container */
+.app-container {
+    min-height: 100vh;
+    padding: 8px;
 }
 
 /* Header */
-.sentinel-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--vscode-panel-border);
-  margin-bottom: 20px;
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--vscode-sidebar);
+    border: 1px solid var(--vscode-border);
+    margin-bottom: 12px;
 }
 
-.sentinel-header h1 {
-  font-size: 1.4em;
-  font-weight: 600;
-  color: var(--vscode-foreground);
-  margin: 0;
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vscode-text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.app-title::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: var(--vscode-blue);
+    border-radius: 50%;
 }
 
 .file-badge {
-  background-color: var(--vscode-badge-background);
-  color: var(--vscode-badge-foreground);
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.85em;
-  font-weight: 500;
+    padding: 2px 8px;
+    background: var(--vscode-input);
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--vscode-text-muted);
+    font-family: 'Consolas', 'Courier New', monospace;
 }
 
-/* Empty State */
-.empty-state {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px;
-  color: var(--vscode-descriptionForeground);
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.empty-icon {
-  font-size: 3em;
-  margin-bottom: 16px;
-  opacity: 0.6;
+.guide-btn {
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+    color: var(--vscode-text);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.1s;
 }
 
-.empty-state h2 {
-  font-size: 1.2em;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--vscode-foreground);
+.guide-btn:hover {
+    background: var(--vscode-input);
 }
 
-.empty-state p {
-  font-size: 0.95em;
-  opacity: 0.8;
+.demo-badge {
+    padding: 2px 8px;
+    background: var(--vscode-yellow);
+    color: #000;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
 }
 
-/* Bento Grid Layout */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 16px;
-  flex: 1;
+/* Functions Grid */
+.functions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
 }
 
 /* Atomic Card */
 .atomic-card {
-  background-color: var(--vscode-editor-inactiveSelectionBackground);
-  border: 1px solid var(--vscode-panel-border);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: var(--vscode-sidebar);
+    border: 1px solid var(--vscode-border);
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .atomic-card:hover {
-  border-color: var(--vscode-focusBorder);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--vscode-blue);
 }
 
 /* Card Header */
 .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 14px;
-  background-color: var(--vscode-sideBarSectionHeader-background);
-  border-bottom: 1px solid var(--vscode-panel-border);
-}
-
-.card-header-clickable {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.card-header-clickable:hover {
-  background-color: var(--vscode-list-hoverBackground);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.expand-button {
-  background: none;
-  border: none;
-  color: var(--vscode-foreground);
-  cursor: pointer;
-  padding: 4px 8px;
-  font-size: 0.8em;
-  opacity: 0.7;
-  transition: opacity 0.15s ease;
-}
-
-.expand-button:hover {
-  opacity: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--vscode-border);
+    background: var(--vscode-bg);
 }
 
 .function-info {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    flex-wrap: wrap;
 }
 
 .function-name {
-  font-weight: 600;
-  color: var(--vscode-symbolIcon-functionForeground, #dcdcaa);
-  font-family: var(--vscode-editor-font-family);
-  font-size: 1em;
+    color: var(--vscode-function);
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.function-args {
-  color: var(--vscode-descriptionForeground);
-  font-family: var(--vscode-editor-font-family);
-  font-size: 0.9em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.function-name:hover {
+    text-decoration: underline;
+}
+
+.function-params {
+    color: var(--vscode-text-muted);
+    font-size: 12px;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-btn {
+    padding: 2px 6px;
+    background: transparent;
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--vscode-text-muted);
+    transition: all 0.1s;
+}
+
+.icon-btn:hover {
+    background: var(--vscode-input);
+    color: var(--vscode-text);
 }
 
 .line-badge {
-  flex-shrink: 0;
-  background-color: var(--vscode-badge-background);
-  color: var(--vscode-badge-foreground);
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.75em;
-  font-weight: 500;
+    padding: 2px 6px;
+    background: var(--vscode-blue);
+    border-radius: 3px;
+    font-size: 11px;
+    color: white;
+    font-family: 'Consolas', monospace;
 }
 
-/* Card Body */
-.card-body {
-  flex: 0 0 auto;
-  padding: 0;
-  overflow: auto;
-  max-height: 180px;
+.risk-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    margin-left: 8px;
 }
 
+/* Code Block */
 .code-block {
-  margin: 0;
-  padding: 12px 14px;
-  background-color: var(--vscode-editor-background);
-  color: var(--vscode-editor-foreground);
-  font-family: var(--vscode-editor-font-family);
-  font-size: var(--vscode-editor-font-size, 13px);
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-x: auto;
+    padding: 12px;
+    background: var(--vscode-bg);
+    overflow-x: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--vscode-text);
+    border-bottom: 1px solid var(--vscode-border);
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .code-block code {
-  font-family: inherit;
+    white-space: pre;
+}
+
+/* AI Buttons - Simplified */
+.ai-buttons {
+    display: flex;
+    gap: 1px;
+    background: var(--vscode-border);
+}
+
+.ai-btn {
+    flex: 1;
+    padding: 6px 8px;
+    background: var(--vscode-sidebar);
+    border: none;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.1s;
+    color: var(--vscode-text);
+}
+
+.ai-btn:hover:not(:disabled) {
+    background: var(--vscode-input);
+}
+
+.ai-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.edge-btn {
+    color: var(--vscode-yellow);
+}
+
+.audit-btn {
+    color: var(--vscode-green);
+}
+
+.summary-btn {
+    color: var(--vscode-purple);
+}
+
+/* Error Box */
+.error-box {
+    margin: 8px;
+    padding: 8px 12px;
+    background: rgba(241, 76, 76, 0.1);
+    border-left: 3px solid var(--vscode-red);
+    color: var(--vscode-red);
+    font-size: 12px;
+}
+
+/* Summary Box */
+.summary-box {
+    margin: 8px;
+    padding: 12px;
+    background: var(--vscode-bg);
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+}
+
+.summary-box h4 {
+    font-size: 12px;
+    margin-bottom: 8px;
+    color: var(--vscode-purple);
+    font-weight: 600;
+}
+
+.summary-item {
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: var(--vscode-text-muted);
+}
+
+.summary-item strong {
+    color: var(--vscode-text);
+}
+
+/* Edge Cases Box */
+.edge-cases-box {
+    margin: 8px;
+    padding: 12px;
+    background: var(--vscode-bg);
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+}
+
+.edge-cases-box h4 {
+    font-size: 12px;
+    margin-bottom: 8px;
+    color: var(--vscode-yellow);
+    font-weight: 600;
+}
+
+.edge-case {
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    background: var(--vscode-sidebar);
+    border-radius: 3px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: background 0.1s;
+}
+
+.edge-case:hover {
+    background: var(--vscode-input);
+}
+
+.edge-case.severity-high {
+    border-left-color: var(--vscode-red);
+}
+
+.edge-case.severity-medium {
+    border-left-color: var(--vscode-yellow);
+}
+
+.edge-case.severity-low {
+    border-left-color: var(--vscode-green);
+}
+
+.edge-case code {
+    display: block;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--vscode-string);
+}
+
+.edge-reason {
+    display: block;
+    font-size: 11px;
+    color: var(--vscode-text-muted);
+    margin-top: 2px;
+}
+
+/* Audit Box */
+.audit-box {
+    margin: 8px;
+    padding: 12px;
+    background: var(--vscode-bg);
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+}
+
+.audit-box h4 {
+    font-size: 12px;
+    margin-bottom: 8px;
+    color: var(--vscode-green);
+    font-weight: 600;
+}
+
+.audit-issue {
+    padding: 8px;
+    margin-bottom: 6px;
+    background: var(--vscode-sidebar);
+    border-radius: 3px;
+}
+
+.severity-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-right: 6px;
+    text-transform: uppercase;
+}
+
+.severity-badge.low {
+    background: var(--vscode-green);
+    color: #000;
+}
+
+.severity-badge.medium {
+    background: var(--vscode-yellow);
+    color: #000;
+}
+
+.severity-badge.high {
+    background: var(--vscode-red);
+    color: #fff;
+}
+
+.severity-badge.critical {
+    background: #7f1d1d;
+    color: #fff;
+}
+
+.issue-type {
+    color: var(--vscode-text-muted);
+    font-size: 11px;
+}
+
+.audit-issue p {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--vscode-text);
+}
+
+.apply-fix-btn {
+    margin-top: 8px;
+    padding: 4px 12px;
+    background: var(--vscode-blue);
+    border: none;
+    border-radius: 3px;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.apply-fix-btn:hover {
+    background: var(--vscode-blue-hover);
 }
 
 /* Test Section */
 .test-section {
-  padding: 12px 14px;
-  background-color: var(--vscode-sideBar-background);
-  border-top: 1px solid var(--vscode-panel-border);
+    padding: 12px;
 }
 
-.test-header {
-  margin-bottom: 10px;
+.test-section h4 {
+    font-size: 12px;
+    margin-bottom: 8px;
+    color: var(--vscode-text);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.test-title {
-  font-weight: 600;
-  font-size: 0.9em;
-  color: var(--vscode-foreground);
+.test-section h4::before {
+    content: '✎';
+    font-size: 11px;
+    color: var(--vscode-text-muted);
 }
 
-.input-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
+.params-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.input-label {
-  font-size: 0.85em;
-  color: var(--vscode-foreground);
-  font-weight: 500;
+.param-input label {
+    display: block;
+    font-size: 11px;
+    margin-bottom: 3px;
+    color: var(--vscode-text-muted);
 }
 
 .type-hint {
-  color: var(--vscode-descriptionForeground);
-  font-weight: 400;
-  font-size: 0.9em;
+    color: var(--vscode-keyword);
 }
 
-.param-input {
-  padding: 6px 10px;
-  background-color: var(--vscode-input-background);
-  color: var(--vscode-input-foreground);
-  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
-  border-radius: 4px;
-  font-family: var(--vscode-editor-font-family);
-  font-size: 0.9em;
-  outline: none;
-  transition: border-color 0.15s ease;
+.param-input input {
+    width: 100%;
+    padding: 5px 8px;
+    background: var(--vscode-input);
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+    color: var(--vscode-text);
+    font-size: 12px;
+    font-family: 'Consolas', monospace;
 }
 
-.param-input:focus {
-  border-color: var(--vscode-focusBorder);
+.param-input input:focus {
+    outline: none;
+    border-color: var(--vscode-blue);
 }
 
-.param-input::placeholder {
-  color: var(--vscode-input-placeholderForeground);
-  opacity: 0.7;
+.run-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--vscode-blue);
+    border: none;
+    border-radius: 3px;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
-.no-params {
-  font-size: 0.85em;
-  color: var(--vscode-descriptionForeground);
-  margin-bottom: 12px;
-  font-style: italic;
+.run-btn::before {
+    content: '▶';
+    font-size: 10px;
 }
 
-/* Run Button */
-.run-button {
-  width: 100%;
-  padding: 8px 16px;
-  background-color: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: var(--vscode-font-family);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+.run-btn:hover:not(:disabled) {
+    background: var(--vscode-blue-hover);
 }
 
-.run-button:hover:not(:disabled) {
-  background-color: var(--vscode-button-hoverBackground);
+.run-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
-.run-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* Result Box */
+.result-box {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 3px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
 }
 
-/* Spinner */
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--vscode-button-foreground);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.result-box.success {
+    background: rgba(137, 209, 133, 0.1);
+    border-left: 3px solid var(--vscode-green);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.result-box.error {
+    background: rgba(241, 76, 76, 0.1);
+    border-left: 3px solid var(--vscode-red);
 }
 
-/* Output Section */
-.output-section {
-  margin-top: 12px;
-  border-radius: 4px;
-  overflow: hidden;
+.result-icon {
+    margin-right: 6px;
 }
 
-.output-success {
-  background-color: rgba(40, 167, 69, 0.15);
-  border: 1px solid rgba(40, 167, 69, 0.4);
+.result-label {
+    font-size: 11px;
+    color: var(--vscode-text-muted);
+    display: block;
+    margin-bottom: 4px;
 }
 
-.output-error {
-  background-color: rgba(220, 53, 69, 0.15);
-  border: 1px solid rgba(220, 53, 69, 0.4);
+.result-value {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--vscode-text);
+    overflow-x: auto;
 }
 
-.output-header {
-  padding: 6px 10px;
-  font-size: 0.85em;
-  font-weight: 600;
+/* Error Explanation */
+.error-explanation {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--vscode-border);
 }
 
-.output-success .output-header {
-  background-color: rgba(40, 167, 69, 0.2);
-  color: #28a745;
+.explanation-section {
+    margin-bottom: 8px;
 }
 
-.output-error .output-header {
-  background-color: rgba(220, 53, 69, 0.2);
-  color: #dc3545;
+.explanation-section strong {
+    display: block;
+    color: var(--vscode-blue);
+    font-size: 11px;
+    margin-bottom: 2px;
 }
 
-.output-content {
-  margin: 0;
-  padding: 10px;
-  font-family: var(--vscode-editor-font-family);
-  font-size: 0.9em;
-  white-space: pre-wrap;
-  word-break: break-all;
-  color: var(--vscode-foreground);
-  max-height: 120px;
-  overflow-y: auto;
+.explanation-section p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--vscode-text);
+    line-height: 1.5;
 }
 
-/* Card Footer */
-.card-footer {
-  padding: 10px 14px;
-  background-color: var(--vscode-sideBarSectionHeader-background);
-  border-top: 1px solid var(--vscode-panel-border);
+/* Explain Error Button */
+.explain-error-btn {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: var(--vscode-blue);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
 }
 
-.scan-button {
-  width: 100%;
-  padding: 8px 16px;
-  background-color: var(--vscode-button-secondaryBackground);
-  color: var(--vscode-button-secondaryForeground);
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: var(--vscode-font-family);
+.explain-error-btn:hover {
+    opacity: 0.9;
 }
 
-.scan-button:hover {
-  background-color: var(--vscode-button-secondaryHoverBackground);
+.explain-error-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.scan-button:focus {
-  outline: 1px solid var(--vscode-focusBorder);
-  outline-offset: 1px;
+/* Language Badge */
+.lang-badge {
+    background: var(--vscode-input);
+    color: var(--vscode-text-muted);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    text-transform: uppercase;
 }
 
-/* Footer */
-.sentinel-footer {
-  margin-top: 20px;
-  padding-top: 12px;
-  border-top: 1px solid var(--vscode-panel-border);
-  text-align: center;
-  color: var(--vscode-descriptionForeground);
-  font-size: 0.85em;
+/* Language Notice */
+.lang-notice {
+    padding: 12px;
+    background: var(--vscode-input);
+    border-radius: 4px;
+    color: var(--vscode-text-muted);
+    font-size: 12px;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+.lang-notice p {
+    margin: 4px 0;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--vscode-scrollbarSlider-background);
+/* Edge Case Severity Badge */
+.edge-case .severity-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-right: 8px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--vscode-scrollbarSlider-hoverBackground);
-  border-radius: 5px;
+.edge-case .severity-badge.high {
+    background: #f14c4c;
+    color: #fff;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--vscode-scrollbarSlider-activeBackground);
-}`, "",{"version":3,"sources":["webpack://./src/webview/styles.css"],"names":[],"mappings":"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","sourceRoot":""}]);
+.edge-case .severity-badge.medium {
+    background: #cca700;
+    color: #1e1e1e;
+}
+
+.edge-case .severity-badge.low {
+    background: #89d185;
+    color: #1e1e1e;
+}
+
+/* Audit Success Box */
+.audit-box.success {
+    background: rgba(137, 209, 133, 0.1);
+    border: 1px solid #89d185;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    grid-column: 1 / -1;
+    color: var(--vscode-text-muted);
+}
+
+.empty-state h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    font-size: 12px;
+}
+
+/* Guide Panel (Modal) */
+.guide-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 24px;
+}
+
+.guide-panel {
+    background: var(--vscode-sidebar);
+    border: 1px solid var(--vscode-border);
+    border-radius: 4px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--vscode-bg);
+    border-bottom: 1px solid var(--vscode-border);
+}
+
+.guide-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vscode-text);
+}
+
+.close-btn {
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+    color: var(--vscode-text);
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.close-btn:hover {
+    background: var(--vscode-input);
+}
+
+.guide-content {
+    padding: 16px;
+}
+
+.guide-section {
+    margin-bottom: 16px;
+}
+
+.guide-section h3 {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--vscode-text);
+}
+
+.workflow-step {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    background: var(--vscode-bg);
+    border-radius: 3px;
+    border-left: 2px solid var(--vscode-blue);
+    font-size: 12px;
+}
+
+.workflow-step strong {
+    color: var(--vscode-function);
+}
+
+/* Chat Interface */
+.chat-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 360px;
+    background: var(--vscode-sidebar);
+    border-left: 1px solid var(--vscode-border);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--vscode-bg);
+    border-bottom: 1px solid var(--vscode-border);
+}
+
+.chat-header h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--vscode-text);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.chat-message {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.chat-message.user {
+    background: var(--vscode-blue);
+    margin-left: 24px;
+    color: white;
+}
+
+.chat-message.assistant {
+    background: var(--vscode-bg);
+    margin-right: 24px;
+    color: var(--vscode-text);
+}
+
+.chat-input-area {
+    padding: 12px;
+    border-top: 1px solid var(--vscode-border);
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--vscode-input);
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+    color: var(--vscode-text);
+    font-size: 12px;
+}
+
+.chat-input-area input:focus {
+    outline: none;
+    border-color: var(--vscode-blue);
+}
+
+.chat-input-area button {
+    padding: 8px 16px;
+    background: var(--vscode-blue);
+    border: none;
+    border-radius: 3px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.chat-input-area button:hover {
+    background: var(--vscode-blue-hover);
+}
+
+/* Loading */
+.loading-spinner {
+    text-align: center;
+    padding: 24px;
+    color: var(--vscode-text-muted);
+    font-size: 12px;
+}
+
+/* Scan Risk Button */
+.scan-risk-btn {
+    width: calc(100% - 16px);
+    margin: 8px;
+    padding: 8px;
+    background: var(--vscode-bg);
+    border: 1px solid var(--vscode-border);
+    border-radius: 3px;
+    color: var(--vscode-text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.scan-risk-btn::before {
+    content: '○';
+    color: var(--vscode-blue);
+}
+
+.scan-risk-btn:hover {
+    background: var(--vscode-input);
+    color: var(--vscode-text);
+}
+
+/* Error Actions Container */
+.error-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+/* Quick Fix Button */
+.quick-fix-btn {
+    padding: 6px 12px;
+    background: #89d185;
+    color: #1e1e1e;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.quick-fix-btn:hover {
+    background: #6ecf68;
+}
+
+.quick-fix-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Quick Fix Result */
+.quick-fix-result {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(137, 209, 133, 0.1);
+    border: 1px solid #89d185;
+    border-radius: 4px;
+}
+
+.quick-fix-result h5 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: #89d185;
+}
+
+.quick-fix-result .fixed-code {
+    background: var(--vscode-bg);
+    padding: 10px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-x: auto;
+    max-height: 200px;
+    margin-bottom: 10px;
+}
+
+.apply-quick-fix-btn {
+    padding: 8px 16px;
+    background: var(--vscode-blue);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.apply-quick-fix-btn:hover {
+    opacity: 0.9;
+}
+
+/* Language badge inline */
+.lang-badge-inline {
+    font-size: 10px;
+    color: var(--vscode-text-muted);
+    font-weight: normal;
+}`, "",{"version":3,"sources":["webpack://./src/webview/styles.css"],"names":[],"mappings":"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","sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -35632,84 +36172,227 @@ module.exports = styleTagTransform;
 (__unused_webpack_module, exports, __webpack_require__) {
 
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.App = void 0;
 const jsx_runtime_1 = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 const react_1 = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-const AtomicCard_1 = __importDefault(__webpack_require__(/*! ./components/AtomicCard */ "./src/webview/components/AtomicCard.tsx"));
-const vscode = acquireVsCodeApi();
-// Store pending execution promises
-const pendingExecutions = new Map();
+const AtomicCard_1 = __webpack_require__(/*! ./components/AtomicCard */ "./src/webview/components/AtomicCard.tsx");
+const FunctionPreview_1 = __webpack_require__(/*! ./components/FunctionPreview */ "./src/webview/components/FunctionPreview.tsx");
+const FileTree_1 = __webpack_require__(/*! ./components/FileTree */ "./src/webview/components/FileTree.tsx");
+const GuidePanel_1 = __webpack_require__(/*! ./components/GuidePanel */ "./src/webview/components/GuidePanel.tsx");
+const ChatInterface_1 = __webpack_require__(/*! ./components/ChatInterface */ "./src/webview/components/ChatInterface.tsx");
+const vscodeApi_1 = __webpack_require__(/*! ./vscodeApi */ "./src/webview/vscodeApi.ts");
+__webpack_require__(/*! ./styles.css */ "./src/webview/styles.css");
 let requestCounter = 0;
+const pendingRequests = new Map();
+function createRequest(type, payload, timeout = 60000) {
+    const requestId = `${type}-${++requestCounter}`;
+    return new Promise((resolve, reject) => {
+        pendingRequests.set(requestId, { resolve, reject });
+        (0, vscodeApi_1.postMessage)({ type, payload: { ...payload, requestId } });
+        setTimeout(() => {
+            if (pendingRequests.has(requestId)) {
+                pendingRequests.delete(requestId);
+                reject(new Error(`Request timed out (${timeout / 1000}s)`));
+            }
+        }, timeout);
+    });
+}
 const App = () => {
+    const [functions, setFunctions] = (0, react_1.useState)([]);
     const [fileName, setFileName] = (0, react_1.useState)('');
     const [filePath, setFilePath] = (0, react_1.useState)('');
-    const [functions, setFunctions] = (0, react_1.useState)([]);
+    const [isConfigured, setIsConfigured] = (0, react_1.useState)(false);
+    const [language, setLanguage] = (0, react_1.useState)('python');
+    const [canExecute, setCanExecute] = (0, react_1.useState)(true);
+    // New states for folder/file navigation
+    const [fileTree, setFileTree] = (0, react_1.useState)([]);
+    const [selectedFile, setSelectedFile] = (0, react_1.useState)(null);
+    const [expandedFolders, setExpandedFolders] = (0, react_1.useState)(new Set());
+    const [showSidebar, setShowSidebar] = (0, react_1.useState)(false);
+    // New state for preview/detail view
+    const [selectedFunction, setSelectedFunction] = (0, react_1.useState)(null);
+    const [isDragging, setIsDragging] = (0, react_1.useState)(false);
+    const [showGuide, setShowGuide] = (0, react_1.useState)(false);
+    const [guide, setGuide] = (0, react_1.useState)(null);
+    const [isLoadingGuide, setIsLoadingGuide] = (0, react_1.useState)(false);
+    const [chatOpen, setChatOpen] = (0, react_1.useState)(false);
+    const [chatContext, setChatContext] = (0, react_1.useState)(null);
     (0, react_1.useEffect)(() => {
-        // Listen for messages from the extension
         const handleMessage = (event) => {
             const message = event.data;
-            if (message.type === 'updateFunctions') {
-                setFileName(message.payload.fileName);
-                setFilePath(message.payload.filePath);
-                setFunctions(message.payload.functions);
-            }
-            else if (message.type === 'executeResult') {
-                const pending = pendingExecutions.get(message.payload.requestId);
-                if (pending) {
-                    pending.resolve({
-                        success: message.payload.success,
-                        result: message.payload.result,
-                        error: message.payload.error
-                    });
-                    pendingExecutions.delete(message.payload.requestId);
-                }
+            switch (message.type) {
+                case 'updateFunctions':
+                    setFunctions(message.payload.functions);
+                    setFileName(message.payload.fileName);
+                    setFilePath(message.payload.filePath);
+                    setIsConfigured(message.payload.isConfigured);
+                    setLanguage(message.payload.language || 'python');
+                    setCanExecute(message.payload.canExecute !== false);
+                    setSelectedFunction(null); // Reset to list view on file change
+                    break;
+                case 'folderScanned':
+                    setFileTree(message.payload.files);
+                    setShowSidebar(true);
+                    break;
+                case 'executeResult':
+                case 'edgeCasesResult':
+                case 'auditResult':
+                case 'guideResult':
+                case 'chatResult':
+                case 'summarizeResult':
+                case 'errorExplanationResult':
+                case 'quickFixResult':
+                    const pending = pendingRequests.get(message.payload.requestId);
+                    if (pending) {
+                        pendingRequests.delete(message.payload.requestId);
+                        if (message.payload.success) {
+                            const data = message.payload.guide ||
+                                message.payload.edgeCases ||
+                                message.payload.auditResult ||
+                                message.payload.response ||
+                                message.payload.summary ||
+                                message.payload.explanation ||
+                                message.payload.fixedCode ||
+                                message.payload;
+                            pending.resolve(data);
+                        }
+                        else {
+                            pending.reject(new Error(message.payload.error || 'Request failed'));
+                        }
+                    }
+                    break;
             }
         };
         window.addEventListener('message', handleMessage);
-        return () => {
-            window.removeEventListener('message', handleMessage);
-        };
+        return () => window.removeEventListener('message', handleMessage);
     }, []);
-    const handleScanRisk = (0, react_1.useCallback)((functionName) => {
-        vscode.postMessage({
-            type: 'scanRisk',
-            payload: { functionName }
-        });
+    // Drag and drop handlers
+    const handleDragOver = (0, react_1.useCallback)((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
     }, []);
-    const handleGoToLine = (0, react_1.useCallback)((lineNumber) => {
-        vscode.postMessage({
-            type: 'goToLine',
-            payload: { lineNumber }
-        });
+    const handleDragLeave = (0, react_1.useCallback)((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
     }, []);
-    const handleExecuteFunction = (0, react_1.useCallback)(async (functionName, args) => {
-        const requestId = `exec-${++requestCounter}`;
-        return new Promise((resolve) => {
-            pendingExecutions.set(requestId, { resolve });
-            vscode.postMessage({
-                type: 'executeFunction',
-                payload: {
-                    requestId,
-                    functionName,
-                    args,
-                    filePath
+    const handleDrop = (0, react_1.useCallback)((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        const items = e.dataTransfer.items;
+        const paths = [];
+        // Collect all dropped paths
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.kind === 'file') {
+                const file = item.getAsFile();
+                if (file) {
+                    // In VS Code webview, we need to use a different approach
+                    // Send message to extension to handle the drop
+                    paths.push(file.path || file.name);
+                }
+            }
+        }
+        // For files dropped from VS Code explorer, use dataTransfer.files
+        const files = e.dataTransfer.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.path) {
+                paths.push(file.path);
+            }
+        }
+        // Also check for text/uri-list
+        const uriList = e.dataTransfer.getData('text/uri-list');
+        if (uriList) {
+            uriList.split('\n').forEach(uri => {
+                if (uri.startsWith('file://')) {
+                    paths.push(decodeURIComponent(uri.replace('file:///', '').replace('file://', '')));
                 }
             });
-            // Timeout after 30 seconds
-            setTimeout(() => {
-                if (pendingExecutions.has(requestId)) {
-                    pendingExecutions.delete(requestId);
-                    resolve({ success: false, error: 'Execution timed out after 30 seconds' });
-                }
-            }, 30000);
+        }
+        if (paths.length > 0) {
+            (0, vscodeApi_1.postMessage)({
+                type: 'scanFolder',
+                payload: { paths }
+            });
+        }
+    }, []);
+    const handleSelectFile = (path) => {
+        setSelectedFile(path);
+        (0, vscodeApi_1.postMessage)({
+            type: 'openFile',
+            payload: { filePath: path }
         });
-    }, [filePath]);
-    return ((0, jsx_runtime_1.jsxs)("div", { className: "sentinel-container", children: [(0, jsx_runtime_1.jsxs)("header", { className: "sentinel-header", children: [(0, jsx_runtime_1.jsx)("h1", { children: "\uD83D\uDEE1\uFE0F Sentinel Dashboard" }), fileName && ((0, jsx_runtime_1.jsx)("span", { className: "file-badge", children: fileName }))] }), functions.length === 0 ? ((0, jsx_runtime_1.jsxs)("div", { className: "empty-state", children: [(0, jsx_runtime_1.jsx)("div", { className: "empty-icon", children: "\uD83D\uDCC2" }), (0, jsx_runtime_1.jsx)("h2", { children: "No Functions Detected" }), (0, jsx_runtime_1.jsx)("p", { children: "Open a Python file to visualize its functions" })] })) : ((0, jsx_runtime_1.jsx)("div", { className: "bento-grid", children: functions.map((func, index) => ((0, jsx_runtime_1.jsx)(AtomicCard_1.default, { name: func.name, args: func.args, body: func.body, lineStart: func.lineStart, lineEnd: func.lineEnd, onScanRisk: handleScanRisk, onGoToLine: handleGoToLine, onExecuteFunction: handleExecuteFunction }, `${func.name}-${func.lineStart}-${index}`))) })), (0, jsx_runtime_1.jsx)("footer", { className: "sentinel-footer", children: (0, jsx_runtime_1.jsxs)("span", { children: [functions.length, " function", functions.length !== 1 ? 's' : '', " detected"] }) })] }));
+    };
+    const handleToggleFolder = (path) => {
+        setExpandedFolders(prev => {
+            const next = new Set(prev);
+            if (next.has(path)) {
+                next.delete(path);
+            }
+            else {
+                next.add(path);
+            }
+            return next;
+        });
+    };
+    const handleFunctionClick = (func) => {
+        setSelectedFunction(func);
+    };
+    const handleBackToList = () => {
+        setSelectedFunction(null);
+    };
+    // API handlers
+    const handleExecute = async (functionName, args, fPath) => {
+        return createRequest('executeFunction', { functionName, args, filePath: fPath }, 45000);
+    };
+    const handleEdgeCases = async (functionName, functionCode) => {
+        return createRequest('generateEdgeCases', { functionName, functionCode }, 90000);
+    };
+    const handleAudit = async (functionName, functionCode) => {
+        return createRequest('auditCode', { functionName, functionCode }, 90000);
+    };
+    const handleSummarize = async (functionName, functionCode) => {
+        return createRequest('summarizeFunction', { functionName, functionCode }, 90000);
+    };
+    const handleExplainError = async (functionName, functionCode, errorMessage, inputArgs) => {
+        return createRequest('explainError', { functionName, functionCode, errorMessage, inputArgs }, 90000);
+    };
+    const handleQuickFix = async (functionName, functionCode, errorMessage, inputArgs) => {
+        return createRequest('quickFix', { functionName, functionCode, errorMessage, inputArgs }, 90000);
+    };
+    const handleOpenChat = (functionName, functionCode) => {
+        setChatContext({ name: functionName, code: functionCode });
+        setChatOpen(true);
+    };
+    const handleChatQuery = async (question) => {
+        if (!chatContext)
+            throw new Error('No chat context');
+        return createRequest('chatQuery', { functionName: chatContext.name, functionCode: chatContext.code, question }, 90000);
+    };
+    const handleGenerateGuide = async () => {
+        setIsLoadingGuide(true);
+        try {
+            const result = await createRequest('generateGuide', {}, 120000);
+            setGuide(result);
+        }
+        catch (e) {
+            console.error('Guide error:', e);
+        }
+        finally {
+            setIsLoadingGuide(false);
+        }
+    };
+    return ((0, jsx_runtime_1.jsxs)("div", { className: `app-container ${showSidebar ? 'with-sidebar' : ''}`, onDragOver: handleDragOver, onDragLeave: handleDragLeave, onDrop: handleDrop, children: [isDragging && ((0, jsx_runtime_1.jsx)("div", { className: "drop-overlay", children: (0, jsx_runtime_1.jsxs)("div", { className: "drop-message", children: [(0, jsx_runtime_1.jsx)("span", { className: "drop-icon", children: "\uD83D\uDCC2" }), (0, jsx_runtime_1.jsx)("span", { children: "Drop files or folders here" })] }) })), showSidebar && ((0, jsx_runtime_1.jsx)("aside", { className: "sidebar", children: (0, jsx_runtime_1.jsx)(FileTree_1.FileTree, { files: fileTree, selectedFile: selectedFile, onSelectFile: handleSelectFile, expandedFolders: expandedFolders, onToggleFolder: handleToggleFolder }) })), (0, jsx_runtime_1.jsxs)("main", { className: "main-content", children: [(0, jsx_runtime_1.jsxs)("header", { className: "app-header", children: [(0, jsx_runtime_1.jsxs)("div", { className: "header-left", children: [selectedFunction ? ((0, jsx_runtime_1.jsx)("button", { className: "back-btn", onClick: handleBackToList, children: "\u2190 Back" })) : ((0, jsx_runtime_1.jsx)("h1", { className: "app-title", children: "Sentinel Dashboard" })), (0, jsx_runtime_1.jsx)("span", { className: "file-badge", children: fileName }), (0, jsx_runtime_1.jsx)("span", { className: "lang-badge", children: language.toUpperCase() })] }), (0, jsx_runtime_1.jsxs)("div", { className: "header-right", children: [!showSidebar && ((0, jsx_runtime_1.jsx)("button", { className: "toggle-sidebar-btn", onClick: () => setShowSidebar(true), title: "Show file explorer", children: "\uD83D\uDCC1" })), (0, jsx_runtime_1.jsx)("button", { className: "guide-btn", onClick: () => {
+                                            setShowGuide(true);
+                                            if (!guide)
+                                                handleGenerateGuide();
+                                        }, children: "Project Guide" }), !isConfigured && ((0, jsx_runtime_1.jsx)("span", { className: "demo-badge", children: "Not Configured" }))] })] }), selectedFunction && ((0, jsx_runtime_1.jsx)("div", { className: "function-detail-view", children: (0, jsx_runtime_1.jsx)(AtomicCard_1.AtomicCard, { func: selectedFunction, onExecute: handleExecute, onEdgeCases: handleEdgeCases, onAudit: handleAudit, onSummarize: handleSummarize, onOpenChat: handleOpenChat, onExplainError: handleExplainError, onQuickFix: handleQuickFix, filePath: filePath, language: language, canExecute: canExecute }) })), !selectedFunction && ((0, jsx_runtime_1.jsx)("div", { className: "functions-preview-grid", children: functions.length === 0 ? ((0, jsx_runtime_1.jsxs)("div", { className: "empty-state", children: [(0, jsx_runtime_1.jsx)("div", { className: "empty-icon", children: "\uD83D\uDCC2" }), (0, jsx_runtime_1.jsx)("h2", { children: "No functions detected" }), (0, jsx_runtime_1.jsx)("p", { children: "Open a supported file or drop a folder here" }), (0, jsx_runtime_1.jsx)("p", { className: "supported-langs", children: "Python, Java, Go, C, C++, JavaScript, TypeScript" })] })) : (functions.map((func, index) => ((0, jsx_runtime_1.jsx)(FunctionPreview_1.FunctionPreview, { func: func, onClick: () => handleFunctionClick(func), isActive: false }, `${func.name}-${index}`)))) }))] }), showGuide && ((0, jsx_runtime_1.jsx)(GuidePanel_1.GuidePanel, { guide: guide, isLoading: isLoadingGuide, onClose: () => setShowGuide(false), onGenerate: handleGenerateGuide })), chatOpen && chatContext && ((0, jsx_runtime_1.jsx)(ChatInterface_1.ChatInterface, { functionName: chatContext.name, onClose: () => setChatOpen(false), onQuery: handleChatQuery }))] }));
 };
-exports["default"] = App;
+exports.App = App;
 
 
 /***/ },
@@ -35722,128 +36405,360 @@ exports["default"] = App;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AtomicCard = void 0;
 const jsx_runtime_1 = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 const react_1 = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/**
- * Parse function arguments string into structured data
- */
-function parseArguments(argsString) {
-    if (!argsString.trim())
-        return [];
-    const args = [];
-    const argParts = argsString.split(',').map(s => s.trim()).filter(s => s && s !== 'self');
-    for (const part of argParts) {
-        // Match patterns like: "name: str", "x: float = 0", "items: list"
-        const match = part.match(/^(\w+)(?:\s*:\s*(\w+))?(?:\s*=\s*(.+))?$/);
-        if (match) {
-            args.push({
-                name: match[1],
-                type: match[2] || 'any',
-                defaultValue: match[3]
-            });
-        }
-    }
-    return args;
-}
-/**
- * Get placeholder text based on argument type
- */
-function getPlaceholder(arg) {
-    const typeHints = {
-        str: 'Hello',
-        int: '42',
-        float: '3.14',
-        bool: 'True',
-        list: '[1, 2, 3]',
-        dict: '{"key": "value"}',
-        any: 'value'
-    };
-    return arg.defaultValue || typeHints[arg.type] || typeHints.any;
-}
-/**
- * Format input value for Python based on expected type
- */
-function formatInputForPython(value, argType) {
-    const trimmed = value.trim();
-    if (!trimmed)
-        return '';
-    // If it's already properly formatted (starts with quote, bracket, number, True/False/None)
-    if (/^["'\[\]{]/.test(trimmed) ||
-        /^-?\d/.test(trimmed) ||
-        /^(True|False|None)$/i.test(trimmed)) {
-        return trimmed;
-    }
-    // For string types, auto-quote if not already quoted
-    if (argType === 'str' || argType === 'any') {
-        // Check if the input looks like a number
-        if (/^-?\d+\.?\d*$/.test(trimmed)) {
-            return trimmed; // It's a number, don't quote
-        }
-        // Wrap in quotes for strings
-        return `"${trimmed.replace(/"/g, '\\"')}"`;
-    }
-    return trimmed;
-}
-const AtomicCard = ({ name, args, body, lineStart, lineEnd, onScanRisk, onGoToLine, onExecuteFunction }) => {
-    const parsedArgs = (0, react_1.useMemo)(() => parseArguments(args), [args]);
+const vscodeApi_1 = __webpack_require__(/*! ../vscodeApi */ "./src/webview/vscodeApi.ts");
+const AtomicCard = ({ func, onExecute, onEdgeCases, onAudit, onSummarize, onOpenChat, onExplainError, onQuickFix, filePath, language, canExecute }) => {
     const [inputValues, setInputValues] = (0, react_1.useState)({});
-    const [output, setOutput] = (0, react_1.useState)(null);
-    const [isLoading, setIsLoading] = (0, react_1.useState)(false);
+    const [result, setResult] = (0, react_1.useState)(null);
+    const [isRunning, setIsRunning] = (0, react_1.useState)(false);
     const [isExpanded, setIsExpanded] = (0, react_1.useState)(true);
-    const handleInputChange = (argName, value) => {
-        setInputValues(prev => ({ ...prev, [argName]: value }));
-        // Clear output when input changes
-        if (output)
-            setOutput(null);
+    const [currentInputArgs, setCurrentInputArgs] = (0, react_1.useState)([]);
+    const [edgeCases, setEdgeCases] = (0, react_1.useState)(null);
+    const [auditResult, setAuditResult] = (0, react_1.useState)(null);
+    const [summary, setSummary] = (0, react_1.useState)(null);
+    const [errorExplanation, setErrorExplanation] = (0, react_1.useState)(null);
+    const [fixedCode, setFixedCode] = (0, react_1.useState)(null);
+    const [isLoadingEdges, setIsLoadingEdges] = (0, react_1.useState)(false);
+    const [isLoadingAudit, setIsLoadingAudit] = (0, react_1.useState)(false);
+    const [isLoadingSummary, setIsLoadingSummary] = (0, react_1.useState)(false);
+    const [isExplainingError, setIsExplainingError] = (0, react_1.useState)(false);
+    const [isGeneratingFix, setIsGeneratingFix] = (0, react_1.useState)(false);
+    const [error, setError] = (0, react_1.useState)(null);
+    const handleInputChange = (paramName, value) => {
+        setInputValues(prev => ({ ...prev, [paramName]: value }));
     };
-    const handleExecute = async () => {
-        setIsLoading(true);
-        setOutput(null);
+    const handleRun = async () => {
+        setIsRunning(true);
+        setResult(null);
+        setError(null);
+        setErrorExplanation(null);
+        setFixedCode(null);
         try {
-            // Get argument values in order, formatting them for Python
-            const argValues = parsedArgs.map(arg => {
-                const rawValue = inputValues[arg.name] || arg.defaultValue || '';
-                return formatInputForPython(rawValue, arg.type);
-            });
-            // Check if all required args have values
-            const emptyArgs = parsedArgs.filter((arg, i) => !argValues[i] && !arg.defaultValue);
-            if (emptyArgs.length > 0) {
-                setOutput({
-                    success: false,
-                    error: `Missing required argument(s): ${emptyArgs.map(a => a.name).join(', ')}`
-                });
-                setIsLoading(false);
-                return;
-            }
-            const result = await onExecuteFunction(name, argValues);
-            setOutput(result);
+            const args = func.parameters.map(p => inputValues[p.name] || '');
+            setCurrentInputArgs(args);
+            const response = await onExecute(func.name, args, filePath);
+            setResult(response);
         }
-        catch (err) {
-            setOutput({
-                success: false,
-                error: err instanceof Error ? err.message : 'Unknown error'
-            });
+        catch (e) {
+            setResult({ success: false, error: e.message });
+        }
+        finally {
+            setIsRunning(false);
+        }
+    };
+    const handleExplainError = async () => {
+        if (!result || result.success || !result.error)
+            return;
+        setIsExplainingError(true);
+        setErrorExplanation(null);
+        try {
+            const explanation = await onExplainError(func.name, func.code, result.error, currentInputArgs);
+            setErrorExplanation(explanation);
+        }
+        catch (e) {
+            setError(`Could not explain error: ${e.message}`);
+        }
+        finally {
+            setIsExplainingError(false);
+        }
+    };
+    const handleQuickFix = async () => {
+        if (!result || result.success || !result.error)
+            return;
+        setIsGeneratingFix(true);
+        setFixedCode(null);
+        try {
+            const fixed = await onQuickFix(func.name, func.code, result.error, currentInputArgs);
+            setFixedCode(fixed);
+        }
+        catch (e) {
+            setError(`Could not generate fix: ${e.message}`);
+        }
+        finally {
+            setIsGeneratingFix(false);
+        }
+    };
+    const handleApplyQuickFix = () => {
+        if (!fixedCode)
+            return;
+        (0, vscodeApi_1.postMessage)({
+            type: 'applyFix',
+            payload: {
+                functionName: func.name,
+                functionCode: fixedCode,
+                issue: result?.error || 'Error fix',
+                lineStart: func.lineStart,
+                lineEnd: func.lineEnd
+            }
+        });
+    };
+    const handleEdgeCases = async () => {
+        setIsLoadingEdges(true);
+        setError(null);
+        try {
+            const cases = await onEdgeCases(func.name, func.code);
+            setEdgeCases(cases);
+        }
+        catch (e) {
+            setError(`Edge cases failed: ${e.message}`);
+        }
+        finally {
+            setIsLoadingEdges(false);
+        }
+    };
+    const handleAudit = async () => {
+        setIsLoadingAudit(true);
+        setError(null);
+        try {
+            const result = await onAudit(func.name, func.code);
+            setAuditResult(result);
+        }
+        catch (e) {
+            setError(`Audit failed: ${e.message}`);
+        }
+        finally {
+            setIsLoadingAudit(false);
+        }
+    };
+    const handleSummarize = async () => {
+        setIsLoadingSummary(true);
+        setError(null);
+        try {
+            const result = await onSummarize(func.name, func.code);
+            setSummary(result);
+        }
+        catch (e) {
+            setError(`Summary failed: ${e.message}`);
+        }
+        finally {
+            setIsLoadingSummary(false);
+        }
+    };
+    const applyEdgeCase = (edgeCase) => {
+        const args = edgeCase.inputArgs.split(',').map(a => a.trim());
+        func.parameters.forEach((param, index) => {
+            if (args[index]) {
+                setInputValues(prev => ({ ...prev, [param.name]: args[index] }));
+            }
+        });
+    };
+    const handleApplyFix = (issue) => {
+        (0, vscodeApi_1.postMessage)({
+            type: 'applyFix',
+            payload: {
+                functionName: func.name,
+                functionCode: func.code,
+                issue: issue.issue,
+                lineStart: func.lineStart,
+                lineEnd: func.lineEnd
+            }
+        });
+    };
+    const goToLine = () => {
+        (0, vscodeApi_1.postMessage)({
+            type: 'goToLine',
+            payload: { lineNumber: func.lineStart }
+        });
+    };
+    const getRiskBadge = () => {
+        if (!auditResult)
+            return null;
+        const score = auditResult.riskScore;
+        const color = score < 30 ? '#89d185' : score < 70 ? '#cca700' : '#f14c4c';
+        const label = score < 30 ? 'LOW' : score < 70 ? 'MEDIUM' : 'HIGH';
+        return ((0, jsx_runtime_1.jsxs)("span", { className: "risk-badge", style: { backgroundColor: color }, children: [label, " ", score] }));
+    };
+    return ((0, jsx_runtime_1.jsxs)("div", { className: "atomic-card", children: [(0, jsx_runtime_1.jsxs)("div", { className: "card-header", children: [(0, jsx_runtime_1.jsxs)("div", { className: "function-info", children: [(0, jsx_runtime_1.jsx)("span", { className: "function-name", onClick: goToLine, children: func.name }), (0, jsx_runtime_1.jsxs)("span", { className: "function-params", children: ["(", func.parameters.map(p => `${p.name}: ${p.type}`).join(', '), ")"] }), getRiskBadge()] }), (0, jsx_runtime_1.jsxs)("div", { className: "card-actions", children: [(0, jsx_runtime_1.jsx)("button", { className: "icon-btn", onClick: () => onOpenChat(func.name, func.code), title: "Chat", children: "Chat" }), (0, jsx_runtime_1.jsx)("button", { className: "icon-btn", onClick: () => setIsExpanded(!isExpanded), title: "Toggle", children: isExpanded ? '▲' : '▼' }), (0, jsx_runtime_1.jsxs)("span", { className: "line-badge", children: ["L", func.lineStart, "-", func.lineEnd] })] })] }), isExpanded && ((0, jsx_runtime_1.jsx)("pre", { className: "code-block", children: (0, jsx_runtime_1.jsx)("code", { children: func.code }) })), (0, jsx_runtime_1.jsxs)("div", { className: "ai-buttons", children: [(0, jsx_runtime_1.jsx)("button", { className: "ai-btn edge-btn", onClick: handleEdgeCases, disabled: isLoadingEdges, children: isLoadingEdges ? 'Loading...' : 'Edge Cases' }), (0, jsx_runtime_1.jsx)("button", { className: "ai-btn audit-btn", onClick: handleAudit, disabled: isLoadingAudit, children: isLoadingAudit ? 'Loading...' : 'Audit' }), (0, jsx_runtime_1.jsx)("button", { className: "ai-btn summary-btn", onClick: handleSummarize, disabled: isLoadingSummary, children: isLoadingSummary ? 'Loading...' : 'Summarize' })] }), error && ((0, jsx_runtime_1.jsx)("div", { className: "error-box", children: error })), summary && ((0, jsx_runtime_1.jsxs)("div", { className: "summary-box", children: [(0, jsx_runtime_1.jsx)("h4", { children: "Function Summary" }), (0, jsx_runtime_1.jsxs)("div", { className: "summary-item", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Purpose:" }), " ", summary.purpose] }), (0, jsx_runtime_1.jsxs)("div", { className: "summary-item", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Inputs:" }), " ", summary.inputs] }), (0, jsx_runtime_1.jsxs)("div", { className: "summary-item", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Outputs:" }), " ", summary.outputs] }), (0, jsx_runtime_1.jsxs)("div", { className: "summary-item", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Complexity:" }), " ", summary.complexity] })] })), edgeCases && edgeCases.length > 0 && ((0, jsx_runtime_1.jsxs)("div", { className: "edge-cases-box", children: [(0, jsx_runtime_1.jsx)("h4", { children: "Test Cases (Priority Order)" }), edgeCases.map((ec, i) => ((0, jsx_runtime_1.jsxs)("div", { className: `edge-case severity-${ec.severity}`, onClick: () => applyEdgeCase(ec), children: [(0, jsx_runtime_1.jsx)("span", { className: `severity-badge ${ec.severity}`, children: ec.severity.toUpperCase() }), (0, jsx_runtime_1.jsx)("code", { children: ec.inputArgs }), (0, jsx_runtime_1.jsx)("span", { className: "edge-reason", children: ec.reason })] }, i)))] })), auditResult && auditResult.issues.length > 0 && ((0, jsx_runtime_1.jsxs)("div", { className: "audit-box", children: [(0, jsx_runtime_1.jsxs)("h4", { children: ["Security & Performance Issues (", auditResult.issues.length, ")"] }), auditResult.issues.map((issue, i) => ((0, jsx_runtime_1.jsxs)("div", { className: `audit-issue severity-${issue.severity}`, children: [(0, jsx_runtime_1.jsx)("span", { className: `severity-badge ${issue.severity}`, children: issue.severity.toUpperCase() }), (0, jsx_runtime_1.jsx)("span", { className: "issue-type", children: issue.type }), (0, jsx_runtime_1.jsx)("p", { children: issue.issue }), issue.fixCode && ((0, jsx_runtime_1.jsx)("button", { className: "apply-fix-btn", onClick: () => handleApplyFix(issue), children: "Apply Fix" }))] }, i)))] })), auditResult && auditResult.issues.length === 0 && ((0, jsx_runtime_1.jsxs)("div", { className: "audit-box success", children: [(0, jsx_runtime_1.jsx)("h4", { children: "No Issues Found" }), (0, jsx_runtime_1.jsxs)("p", { children: ["Risk Score: ", auditResult.riskScore] })] })), (0, jsx_runtime_1.jsxs)("div", { className: "test-section", children: [(0, jsx_runtime_1.jsxs)("h4", { children: ["Test Function ", !canExecute && (0, jsx_runtime_1.jsx)("span", { className: "lang-badge-inline", children: "(Requires Compiler)" })] }), canExecute ? ((0, jsx_runtime_1.jsxs)(jsx_runtime_1.Fragment, { children: [(0, jsx_runtime_1.jsx)("div", { className: "params-grid", children: func.parameters.map(param => ((0, jsx_runtime_1.jsxs)("div", { className: "param-input", children: [(0, jsx_runtime_1.jsxs)("label", { children: [param.name, ": ", (0, jsx_runtime_1.jsx)("span", { className: "type-hint", children: param.type })] }), (0, jsx_runtime_1.jsx)("input", { type: "text", value: inputValues[param.name] || '', onChange: (e) => handleInputChange(param.name, e.target.value), placeholder: param.defaultValue || `Enter ${param.type}` })] }, param.name))) }), (0, jsx_runtime_1.jsx)("button", { className: "run-btn", onClick: handleRun, disabled: isRunning, children: isRunning ? 'Running...' : 'Run' }), result && result.success && ((0, jsx_runtime_1.jsxs)("div", { className: "result-box success", children: [(0, jsx_runtime_1.jsx)("span", { className: "result-label", children: "Result" }), (0, jsx_runtime_1.jsx)("pre", { className: "result-value", children: result.result })] })), result && !result.success && ((0, jsx_runtime_1.jsxs)("div", { className: "result-box error", children: [(0, jsx_runtime_1.jsx)("span", { className: "result-label", children: "Error" }), (0, jsx_runtime_1.jsx)("pre", { className: "result-value", children: result.error }), (0, jsx_runtime_1.jsxs)("div", { className: "error-actions", children: [!errorExplanation && ((0, jsx_runtime_1.jsx)("button", { className: "explain-error-btn", onClick: handleExplainError, disabled: isExplainingError, children: isExplainingError ? 'Analyzing...' : 'Explain Error' })), !fixedCode && ((0, jsx_runtime_1.jsx)("button", { className: "quick-fix-btn", onClick: handleQuickFix, disabled: isGeneratingFix, children: isGeneratingFix ? 'Generating Fix...' : 'Quick Fix' }))] }), errorExplanation && ((0, jsx_runtime_1.jsxs)("div", { className: "error-explanation", children: [(0, jsx_runtime_1.jsxs)("div", { className: "explanation-section", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Error Type:" }), (0, jsx_runtime_1.jsx)("p", { children: errorExplanation.error })] }), (0, jsx_runtime_1.jsxs)("div", { className: "explanation-section", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Why this happened:" }), (0, jsx_runtime_1.jsx)("p", { children: errorExplanation.explanation })] }), (0, jsx_runtime_1.jsxs)("div", { className: "explanation-section", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Expected input:" }), (0, jsx_runtime_1.jsx)("p", { children: errorExplanation.expectedInput })] }), (0, jsx_runtime_1.jsxs)("div", { className: "explanation-section", children: [(0, jsx_runtime_1.jsx)("strong", { children: "Suggestion:" }), (0, jsx_runtime_1.jsx)("p", { children: errorExplanation.suggestion })] })] })), fixedCode && ((0, jsx_runtime_1.jsxs)("div", { className: "quick-fix-result", children: [(0, jsx_runtime_1.jsx)("h5", { children: "AI Generated Fix:" }), (0, jsx_runtime_1.jsx)("pre", { className: "fixed-code", children: fixedCode }), (0, jsx_runtime_1.jsx)("button", { className: "apply-quick-fix-btn", onClick: handleApplyQuickFix, children: "Apply This Fix to Code" })] }))] }))] })) : ((0, jsx_runtime_1.jsxs)("div", { className: "lang-notice", children: [(0, jsx_runtime_1.jsxs)("p", { children: ["Requires ", language.toUpperCase(), " compiler installed (gcc/g++/go)."] }), (0, jsx_runtime_1.jsxs)("p", { children: ["Use ", (0, jsx_runtime_1.jsx)("strong", { children: "Edge Cases" }), ", ", (0, jsx_runtime_1.jsx)("strong", { children: "Audit" }), ", and ", (0, jsx_runtime_1.jsx)("strong", { children: "Summarize" }), " for AI analysis."] })] }))] })] }));
+};
+exports.AtomicCard = AtomicCard;
+
+
+/***/ },
+
+/***/ "./src/webview/components/ChatInterface.tsx"
+/*!**************************************************!*\
+  !*** ./src/webview/components/ChatInterface.tsx ***!
+  \**************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ChatInterface = void 0;
+const jsx_runtime_1 = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+const react_1 = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+const ChatInterface = ({ functionName, onClose, onQuery }) => {
+    const [messages, setMessages] = (0, react_1.useState)([]);
+    const [input, setInput] = (0, react_1.useState)('');
+    const [isLoading, setIsLoading] = (0, react_1.useState)(false);
+    const messagesEndRef = (0, react_1.useRef)(null);
+    (0, react_1.useEffect)(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+    (0, react_1.useEffect)(() => {
+        setMessages([]);
+    }, [functionName]);
+    const handleSend = async () => {
+        if (!input.trim() || isLoading)
+            return;
+        const question = input.trim();
+        setInput('');
+        setMessages(prev => [...prev, { role: 'user', content: question }]);
+        setIsLoading(true);
+        try {
+            const response = await onQuery(question);
+            setMessages(prev => [...prev, {
+                    role: 'assistant',
+                    content: response.answer,
+                    codeSnippet: response.codeSnippet
+                }]);
+        }
+        catch (error) {
+            setMessages(prev => [...prev, {
+                    role: 'assistant',
+                    content: `Error: ${error.message}`
+                }]);
         }
         finally {
             setIsLoading(false);
         }
     };
-    const handleHeaderClick = () => {
-        onGoToLine(lineStart);
-    };
-    const handleToggleExpand = (e) => {
-        e.stopPropagation();
-        setIsExpanded(!isExpanded);
-    };
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            handleExecute();
+            handleSend();
         }
     };
-    return ((0, jsx_runtime_1.jsxs)("article", { className: "atomic-card", children: [(0, jsx_runtime_1.jsxs)("header", { className: "card-header card-header-clickable", onClick: handleHeaderClick, title: `Click to go to line ${lineStart}`, children: [(0, jsx_runtime_1.jsxs)("div", { className: "function-info", children: [(0, jsx_runtime_1.jsx)("span", { className: "function-name", children: name }), (0, jsx_runtime_1.jsxs)("span", { className: "function-args", children: ["(", args, ")"] })] }), (0, jsx_runtime_1.jsxs)("div", { className: "header-actions", children: [(0, jsx_runtime_1.jsx)("button", { className: "expand-button", onClick: handleToggleExpand, title: isExpanded ? 'Collapse' : 'Expand', children: isExpanded ? '▼' : '▶' }), (0, jsx_runtime_1.jsxs)("span", { className: "line-badge", children: ["L", lineStart, "-", lineEnd] })] })] }), isExpanded && ((0, jsx_runtime_1.jsxs)(jsx_runtime_1.Fragment, { children: [(0, jsx_runtime_1.jsx)("div", { className: "card-body", children: (0, jsx_runtime_1.jsx)("pre", { className: "code-block", children: (0, jsx_runtime_1.jsx)("code", { children: body }) }) }), (0, jsx_runtime_1.jsxs)("div", { className: "test-section", children: [(0, jsx_runtime_1.jsx)("div", { className: "test-header", children: (0, jsx_runtime_1.jsx)("span", { className: "test-title", children: "\uD83E\uDDEA Test Function" }) }), parsedArgs.length > 0 ? ((0, jsx_runtime_1.jsx)("div", { className: "input-grid", children: parsedArgs.map((arg) => ((0, jsx_runtime_1.jsxs)("div", { className: "input-group", children: [(0, jsx_runtime_1.jsxs)("label", { className: "input-label", children: [arg.name, (0, jsx_runtime_1.jsxs)("span", { className: "type-hint", children: [": ", arg.type] })] }), (0, jsx_runtime_1.jsx)("input", { type: "text", className: "param-input", placeholder: getPlaceholder(arg), value: inputValues[arg.name] || '', onChange: (e) => handleInputChange(arg.name, e.target.value), onKeyDown: handleKeyDown })] }, arg.name))) })) : ((0, jsx_runtime_1.jsx)("p", { className: "no-params", children: "No parameters required" })), (0, jsx_runtime_1.jsx)("button", { className: "run-button", onClick: handleExecute, disabled: isLoading, children: isLoading ? ((0, jsx_runtime_1.jsxs)(jsx_runtime_1.Fragment, { children: [(0, jsx_runtime_1.jsx)("span", { className: "spinner" }), "Running..."] })) : ('▶ Run') }), output && ((0, jsx_runtime_1.jsxs)("div", { className: `output-section ${output.success ? 'output-success' : 'output-error'}`, children: [(0, jsx_runtime_1.jsx)("div", { className: "output-header", children: output.success ? '✅ Result' : '❌ Error' }), (0, jsx_runtime_1.jsx)("pre", { className: "output-content", children: output.success ? output.result : output.error })] }))] }), (0, jsx_runtime_1.jsx)("footer", { className: "card-footer", children: (0, jsx_runtime_1.jsx)("button", { className: "scan-button", onClick: () => onScanRisk(name), title: "Scan this function for security risks (Coming Soon)", children: "\uD83D\uDD0D Scan Risk" }) })] }))] }));
+    return ((0, jsx_runtime_1.jsxs)("div", { className: "chat-overlay", children: [(0, jsx_runtime_1.jsxs)("header", { className: "chat-header", children: [(0, jsx_runtime_1.jsxs)("h3", { children: ["Chat: ", functionName] }), (0, jsx_runtime_1.jsx)("button", { className: "close-btn", onClick: onClose, children: "\u00D7" })] }), (0, jsx_runtime_1.jsxs)("div", { className: "chat-messages", children: [messages.length === 0 && ((0, jsx_runtime_1.jsxs)("div", { style: { padding: '12px', color: '#858585', fontSize: '12px' }, children: [(0, jsx_runtime_1.jsx)("p", { children: "Ask anything about this function." }), (0, jsx_runtime_1.jsxs)("div", { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }, children: [(0, jsx_runtime_1.jsx)("button", { onClick: () => setInput('Explain this code'), style: {
+                                            padding: '4px 8px',
+                                            background: '#3c3c3c',
+                                            border: '1px solid #4c4c4c',
+                                            borderRadius: '3px',
+                                            color: '#ccc',
+                                            cursor: 'pointer',
+                                            fontSize: '11px'
+                                        }, children: "Explain code" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => setInput('How to optimize?'), style: {
+                                            padding: '4px 8px',
+                                            background: '#3c3c3c',
+                                            border: '1px solid #4c4c4c',
+                                            borderRadius: '3px',
+                                            color: '#ccc',
+                                            cursor: 'pointer',
+                                            fontSize: '11px'
+                                        }, children: "Optimize" })] })] })), messages.map((msg, index) => ((0, jsx_runtime_1.jsxs)("div", { className: `chat-message ${msg.role}`, children: [(0, jsx_runtime_1.jsx)("div", { children: msg.content }), msg.codeSnippet && ((0, jsx_runtime_1.jsx)("pre", { style: {
+                                    background: '#1e1e1e',
+                                    padding: '8px',
+                                    borderRadius: '3px',
+                                    marginTop: '8px',
+                                    overflow: 'auto',
+                                    fontSize: '12px',
+                                    fontFamily: 'Consolas, monospace'
+                                }, children: (0, jsx_runtime_1.jsx)("code", { children: msg.codeSnippet }) }))] }, index))), isLoading && ((0, jsx_runtime_1.jsx)("div", { className: "chat-message assistant", children: (0, jsx_runtime_1.jsx)("span", { children: "Thinking..." }) })), (0, jsx_runtime_1.jsx)("div", { ref: messagesEndRef })] }), (0, jsx_runtime_1.jsxs)("div", { className: "chat-input-area", children: [(0, jsx_runtime_1.jsx)("input", { type: "text", placeholder: "Ask about this function...", value: input, onChange: (e) => setInput(e.target.value), onKeyDown: handleKeyDown, disabled: isLoading }), (0, jsx_runtime_1.jsx)("button", { onClick: handleSend, disabled: !input.trim() || isLoading, children: "Send" })] })] }));
 };
-exports["default"] = AtomicCard;
+exports.ChatInterface = ChatInterface;
+
+
+/***/ },
+
+/***/ "./src/webview/components/FileTree.tsx"
+/*!*********************************************!*\
+  !*** ./src/webview/components/FileTree.tsx ***!
+  \*********************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileTree = void 0;
+const jsx_runtime_1 = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+const FileTree = ({ files, selectedFile, onSelectFile, expandedFolders, onToggleFolder }) => {
+    const getFileIcon = (file) => {
+        if (file.type === 'folder') {
+            return expandedFolders.has(file.path) ? '📂' : '📁';
+        }
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        switch (ext) {
+            case 'py': return '🐍';
+            case 'js': return '📜';
+            case 'ts': return '📘';
+            case 'java': return '☕';
+            case 'go': return '🔷';
+            case 'c': return '⚙️';
+            case 'cpp': return '⚙️';
+            default: return '📄';
+        }
+    };
+    const renderItem = (file, depth = 0) => {
+        const isSelected = selectedFile === file.path;
+        const isExpanded = expandedFolders.has(file.path);
+        return ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsxs)("div", { className: `file-tree-item ${isSelected ? 'selected' : ''} ${file.type}`, style: { paddingLeft: `${12 + depth * 16}px` }, onClick: () => {
+                        if (file.type === 'folder') {
+                            onToggleFolder(file.path);
+                        }
+                        else {
+                            onSelectFile(file.path);
+                        }
+                    }, children: [(0, jsx_runtime_1.jsx)("span", { className: "file-icon", children: getFileIcon(file) }), (0, jsx_runtime_1.jsx)("span", { className: "file-name", children: file.name }), file.language && ((0, jsx_runtime_1.jsx)("span", { className: "file-lang", children: file.language }))] }), file.type === 'folder' && isExpanded && file.children && ((0, jsx_runtime_1.jsx)("div", { className: "file-tree-children", children: file.children.map(child => renderItem(child, depth + 1)) }))] }, file.path));
+    };
+    return ((0, jsx_runtime_1.jsxs)("div", { className: "file-tree", children: [(0, jsx_runtime_1.jsx)("div", { className: "file-tree-header", children: (0, jsx_runtime_1.jsx)("span", { children: "Explorer" }) }), (0, jsx_runtime_1.jsx)("div", { className: "file-tree-content", children: files.length === 0 ? ((0, jsx_runtime_1.jsx)("div", { className: "file-tree-empty", children: "Drop a folder here" })) : (files.map(file => renderItem(file))) })] }));
+};
+exports.FileTree = FileTree;
+
+
+/***/ },
+
+/***/ "./src/webview/components/FunctionPreview.tsx"
+/*!****************************************************!*\
+  !*** ./src/webview/components/FunctionPreview.tsx ***!
+  \****************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FunctionPreview = void 0;
+const jsx_runtime_1 = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+const FunctionPreview = ({ func, onClick, isActive }) => {
+    // Generate a one-liner summary from the function
+    const getOneLiner = () => {
+        // Try to extract from docstring or first comment
+        const docMatch = func.code.match(/"""([^"]+)"""|'''([^']+)'''|\/\*\*?\s*([^*]+)\*\/|\/\/\s*(.+)/);
+        if (docMatch) {
+            const doc = (docMatch[1] || docMatch[2] || docMatch[3] || docMatch[4] || '').trim();
+            return doc.split('\n')[0].substring(0, 60) + (doc.length > 60 ? '...' : '');
+        }
+        // Fallback: describe based on parameters
+        if (func.parameters.length === 0) {
+            return 'No parameters required';
+        }
+        return `Takes ${func.parameters.map(p => p.name).join(', ')}`;
+    };
+    const getReturnType = () => {
+        if (func.returnType && func.returnType !== 'any') {
+            return func.returnType;
+        }
+        return '';
+    };
+    return ((0, jsx_runtime_1.jsxs)("div", { className: `function-preview ${isActive ? 'active' : ''}`, onClick: onClick, children: [(0, jsx_runtime_1.jsxs)("div", { className: "preview-header", children: [(0, jsx_runtime_1.jsx)("span", { className: "preview-name", children: func.name }), (0, jsx_runtime_1.jsxs)("span", { className: "preview-params", children: ["(", func.parameters.map(p => p.name).join(', '), ")"] }), getReturnType() && ((0, jsx_runtime_1.jsxs)("span", { className: "preview-return", children: ["\u2192 ", getReturnType()] }))] }), (0, jsx_runtime_1.jsx)("div", { className: "preview-summary", children: getOneLiner() }), (0, jsx_runtime_1.jsx)("div", { className: "preview-meta", children: (0, jsx_runtime_1.jsxs)("span", { className: "preview-lines", children: ["Lines ", func.lineStart, "-", func.lineEnd] }) })] }));
+};
+exports.FunctionPreview = FunctionPreview;
+
+
+/***/ },
+
+/***/ "./src/webview/components/GuidePanel.tsx"
+/*!***********************************************!*\
+  !*** ./src/webview/components/GuidePanel.tsx ***!
+  \***********************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GuidePanel = void 0;
+const jsx_runtime_1 = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+const GuidePanel = ({ guide, isLoading, onClose, onGenerate }) => {
+    return ((0, jsx_runtime_1.jsx)("div", { className: "guide-overlay", onClick: onClose, children: (0, jsx_runtime_1.jsxs)("div", { className: "guide-panel", onClick: (e) => e.stopPropagation(), children: [(0, jsx_runtime_1.jsxs)("header", { className: "guide-header", children: [(0, jsx_runtime_1.jsx)("h2", { children: "Project Guide" }), (0, jsx_runtime_1.jsx)("button", { className: "close-btn", onClick: onClose, children: "\u00D7" })] }), (0, jsx_runtime_1.jsx)("div", { className: "guide-content", children: isLoading ? ((0, jsx_runtime_1.jsx)("div", { className: "loading-spinner", children: (0, jsx_runtime_1.jsx)("p", { children: "Analyzing code with IBM Watsonx..." }) })) : guide ? ((0, jsx_runtime_1.jsxs)(jsx_runtime_1.Fragment, { children: [(0, jsx_runtime_1.jsxs)("section", { className: "guide-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Summary" }), (0, jsx_runtime_1.jsx)("p", { children: guide.summary })] }), (0, jsx_runtime_1.jsxs)("section", { className: "guide-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Testing Workflow" }), guide.workflow.length > 0 ? (guide.workflow.map((step) => ((0, jsx_runtime_1.jsxs)("div", { className: "workflow-step", children: [(0, jsx_runtime_1.jsxs)("strong", { children: [step.step, ". ", step.function] }), (0, jsx_runtime_1.jsxs)("span", { children: [" - ", step.description] })] }, step.step)))) : ((0, jsx_runtime_1.jsx)("p", { children: "No specific workflow suggested" }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "guide-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Dependencies" }), guide.dependencies.length > 0 ? ((0, jsx_runtime_1.jsx)("ul", { children: guide.dependencies.map((dep, i) => ((0, jsx_runtime_1.jsx)("li", { children: dep }, i))) })) : ((0, jsx_runtime_1.jsx)("p", { children: "No dependencies detected" }))] })] })) : ((0, jsx_runtime_1.jsx)("div", { className: "loading-spinner", children: (0, jsx_runtime_1.jsx)("button", { className: "guide-btn", onClick: onGenerate, children: "Generate Guide" }) })) })] }) }));
+};
+exports.GuidePanel = GuidePanel;
 
 
 /***/ },
@@ -35862,12 +36777,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const jsx_runtime_1 = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 const react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const client_1 = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
-const App_1 = __importDefault(__webpack_require__(/*! ./App */ "./src/webview/App.tsx"));
+const App_1 = __webpack_require__(/*! ./App */ "./src/webview/App.tsx");
 __webpack_require__(/*! ./styles.css */ "./src/webview/styles.css");
 const container = document.getElementById('root');
 if (container) {
     const root = (0, client_1.createRoot)(container);
-    root.render((0, jsx_runtime_1.jsx)(react_1.default.StrictMode, { children: (0, jsx_runtime_1.jsx)(App_1.default, {}) }));
+    root.render((0, jsx_runtime_1.jsx)(react_1.default.StrictMode, { children: (0, jsx_runtime_1.jsx)(App_1.App, {}) }));
 }
 
 
@@ -35923,6 +36838,33 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 
        /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_styles_css__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_styles_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_styles_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ },
+
+/***/ "./src/webview/vscodeApi.ts"
+/*!**********************************!*\
+  !*** ./src/webview/vscodeApi.ts ***!
+  \**********************************/
+(__unused_webpack_module, exports) {
+
+
+// VS Code Webview API wrapper
+// This must be called only once per webview session
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getVsCodeApi = getVsCodeApi;
+exports.postMessage = postMessage;
+// Acquire the API once and cache it
+let vscodeApi = null;
+function getVsCodeApi() {
+    if (!vscodeApi) {
+        vscodeApi = acquireVsCodeApi();
+    }
+    return vscodeApi;
+}
+function postMessage(message) {
+    getVsCodeApi().postMessage(message);
+}
 
 
 /***/ }

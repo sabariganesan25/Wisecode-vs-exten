@@ -1,40 +1,43 @@
 import * as vscode from 'vscode';
 import { DashboardPanel } from './panels/DashboardPanel';
-import { parsePythonFunctions } from './utilities/pythonParser';
+import { parseFunctions, detectLanguage } from './utilities/pythonParser';
+import { setExtensionPath } from './services/WatsonAgentService';
 
 let dashboardPanel: DashboardPanel | undefined;
 
-export function activate(context: vscode.ExtensionContext) {
-    console.log('Sentinel-Atomic extension is now active!');
+// Supported languages
+const SUPPORTED_LANGUAGES = ['python', 'java', 'go', 'c', 'cpp', 'javascript', 'typescript'];
 
-    // Register the open dashboard command
+export function activate(context: vscode.ExtensionContext) {
+    console.log('Sentinel-Atomic Pro is now active!');
+    console.log('[Extension] Extension path:', context.extensionPath);
+
+    setExtensionPath(context.extensionPath);
+
     const openDashboardCommand = vscode.commands.registerCommand(
         'sentinel.openDashboard',
         () => {
             dashboardPanel = DashboardPanel.createOrShow(context.extensionUri);
 
-            // If there's an active Python file, parse it immediately
             const activeEditor = vscode.window.activeTextEditor;
-            if (activeEditor && activeEditor.document.languageId === 'python') {
+            if (activeEditor && isSupportedLanguage(activeEditor.document)) {
                 updateDashboard(activeEditor.document);
             }
         }
     );
 
-    // Watch for active editor changes
     const onEditorChange = vscode.window.onDidChangeActiveTextEditor((editor) => {
-        if (editor && editor.document.languageId === 'python' && dashboardPanel) {
+        if (editor && isSupportedLanguage(editor.document) && dashboardPanel) {
             updateDashboard(editor.document);
         }
     });
 
-    // Watch for document content changes
     const onDocumentChange = vscode.workspace.onDidChangeTextDocument((event) => {
         const activeEditor = vscode.window.activeTextEditor;
         if (
             activeEditor &&
             event.document === activeEditor.document &&
-            event.document.languageId === 'python' &&
+            isSupportedLanguage(event.document) &&
             dashboardPanel
         ) {
             updateDashboard(event.document);
@@ -48,20 +51,34 @@ export function activate(context: vscode.ExtensionContext) {
     );
 }
 
-/**
- * Parse the document and update the dashboard
- */
+function isSupportedLanguage(document: vscode.TextDocument): boolean {
+    const langId = document.languageId;
+    const fileName = document.fileName;
+    const detectedLang = detectLanguage(fileName);
+
+    return SUPPORTED_LANGUAGES.includes(langId) ||
+        SUPPORTED_LANGUAGES.includes(detectedLang) ||
+        langId === 'python' || langId === 'java' || langId === 'go' ||
+        langId === 'c' || langId === 'cpp' || langId === 'javascript' || langId === 'typescript';
+}
+
 function updateDashboard(document: vscode.TextDocument): void {
     if (!dashboardPanel) {
         return;
     }
 
     const sourceCode = document.getText();
-    const functions = parsePythonFunctions(sourceCode);
     const fileName = document.fileName.split(/[/\\]/).pop() || 'Unknown';
     const filePath = document.fileName;
+    const language = detectLanguage(fileName);
 
-    dashboardPanel.updateFunctions(fileName, filePath, functions);
+    console.log('[Extension] Parsing file:', fileName, 'Language:', language);
+
+    const functions = parseFunctions(sourceCode, fileName);
+
+    console.log('[Extension] Found', functions.length, 'functions');
+
+    dashboardPanel.updateFunctions(fileName, filePath, functions, sourceCode, language);
 }
 
 export function deactivate() {

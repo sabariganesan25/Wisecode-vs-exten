@@ -1,263 +1,467 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
+import { PythonFunction } from '../../utilities/pythonParser';
+import { postMessage } from '../vscodeApi';
+
+interface EdgeCase {
+    inputArgs: string;
+    reason: string;
+    severity: 'low' | 'medium' | 'high';
+}
+
+interface AuditResult {
+    riskScore: number;
+    issues: Array<{
+        type: string;
+        severity: string;
+        issue: string;
+        fixCode?: string;
+    }>;
+}
+
+interface FunctionSummary {
+    purpose: string;
+    inputs: string;
+    outputs: string;
+    complexity: string;
+}
+
+interface ErrorExplanation {
+    error: string;
+    explanation: string;
+    expectedInput: string;
+    suggestion: string;
+}
+
+interface ExecuteResult {
+    success: boolean;
+    result?: string;
+    error?: string;
+}
 
 interface AtomicCardProps {
-    name: string;
-    args: string;
-    body: string;
-    lineStart: number;
-    lineEnd: number;
-    onScanRisk: (functionName: string) => void;
-    onGoToLine: (lineNumber: number) => void;
-    onExecuteFunction: (functionName: string, args: string[]) => Promise<{ success: boolean; result?: string; error?: string }>;
+    func: PythonFunction;
+    onExecute: (functionName: string, args: string[], filePath: string) => Promise<ExecuteResult>;
+    onEdgeCases: (functionName: string, functionCode: string) => Promise<EdgeCase[]>;
+    onAudit: (functionName: string, functionCode: string) => Promise<AuditResult>;
+    onSummarize: (functionName: string, functionCode: string) => Promise<FunctionSummary>;
+    onOpenChat: (functionName: string, functionCode: string) => void;
+    onExplainError: (functionName: string, functionCode: string, errorMessage: string, inputArgs: string[]) => Promise<ErrorExplanation>;
+    onQuickFix: (functionName: string, functionCode: string, errorMessage: string, inputArgs: string[]) => Promise<string>;
+    filePath: string;
+    language: string;
+    canExecute: boolean;
 }
 
-interface ParsedArg {
-    name: string;
-    type: string;
-    defaultValue?: string;
-}
-
-/**
- * Parse function arguments string into structured data
- */
-function parseArguments(argsString: string): ParsedArg[] {
-    if (!argsString.trim()) return [];
-
-    const args: ParsedArg[] = [];
-    const argParts = argsString.split(',').map(s => s.trim()).filter(s => s && s !== 'self');
-
-    for (const part of argParts) {
-        // Match patterns like: "name: str", "x: float = 0", "items: list"
-        const match = part.match(/^(\w+)(?:\s*:\s*(\w+))?(?:\s*=\s*(.+))?$/);
-        if (match) {
-            args.push({
-                name: match[1],
-                type: match[2] || 'any',
-                defaultValue: match[3]
-            });
-        }
-    }
-
-    return args;
-}
-
-/**
- * Get placeholder text based on argument type
- */
-function getPlaceholder(arg: ParsedArg): string {
-    const typeHints: Record<string, string> = {
-        str: 'Hello',
-        int: '42',
-        float: '3.14',
-        bool: 'True',
-        list: '[1, 2, 3]',
-        dict: '{"key": "value"}',
-        any: 'value'
-    };
-    return arg.defaultValue || typeHints[arg.type] || typeHints.any;
-}
-
-/**
- * Format input value for Python based on expected type
- */
-function formatInputForPython(value: string, argType: string): string {
-    const trimmed = value.trim();
-
-    if (!trimmed) return '';
-
-    // If it's already properly formatted (starts with quote, bracket, number, True/False/None)
-    if (/^["'\[\]{]/.test(trimmed) ||
-        /^-?\d/.test(trimmed) ||
-        /^(True|False|None)$/i.test(trimmed)) {
-        return trimmed;
-    }
-
-    // For string types, auto-quote if not already quoted
-    if (argType === 'str' || argType === 'any') {
-        // Check if the input looks like a number
-        if (/^-?\d+\.?\d*$/.test(trimmed)) {
-            return trimmed; // It's a number, don't quote
-        }
-        // Wrap in quotes for strings
-        return `"${trimmed.replace(/"/g, '\\"')}"`;
-    }
-
-    return trimmed;
-}
-
-const AtomicCard: React.FC<AtomicCardProps> = ({
-    name,
-    args,
-    body,
-    lineStart,
-    lineEnd,
-    onScanRisk,
-    onGoToLine,
-    onExecuteFunction
+export const AtomicCard: React.FC<AtomicCardProps> = ({
+    func,
+    onExecute,
+    onEdgeCases,
+    onAudit,
+    onSummarize,
+    onOpenChat,
+    onExplainError,
+    onQuickFix,
+    filePath,
+    language,
+    canExecute
 }) => {
-    const parsedArgs = useMemo(() => parseArguments(args), [args]);
     const [inputValues, setInputValues] = useState<Record<string, string>>({});
-    const [output, setOutput] = useState<{ success: boolean; result?: string; error?: string } | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [result, setResult] = useState<ExecuteResult | null>(null);
+    const [isRunning, setIsRunning] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
+    const [currentInputArgs, setCurrentInputArgs] = useState<string[]>([]);
 
-    const handleInputChange = (argName: string, value: string) => {
-        setInputValues(prev => ({ ...prev, [argName]: value }));
-        // Clear output when input changes
-        if (output) setOutput(null);
+    const [edgeCases, setEdgeCases] = useState<EdgeCase[] | null>(null);
+    const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+    const [summary, setSummary] = useState<FunctionSummary | null>(null);
+    const [errorExplanation, setErrorExplanation] = useState<ErrorExplanation | null>(null);
+    const [fixedCode, setFixedCode] = useState<string | null>(null);
+
+    const [isLoadingEdges, setIsLoadingEdges] = useState(false);
+    const [isLoadingAudit, setIsLoadingAudit] = useState(false);
+    const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+    const [isExplainingError, setIsExplainingError] = useState(false);
+    const [isGeneratingFix, setIsGeneratingFix] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleInputChange = (paramName: string, value: string) => {
+        setInputValues(prev => ({ ...prev, [paramName]: value }));
     };
 
-    const handleExecute = async () => {
-        setIsLoading(true);
-        setOutput(null);
+    const handleRun = async () => {
+        setIsRunning(true);
+        setResult(null);
+        setError(null);
+        setErrorExplanation(null);
+        setFixedCode(null);
 
         try {
-            // Get argument values in order, formatting them for Python
-            const argValues = parsedArgs.map(arg => {
-                const rawValue = inputValues[arg.name] || arg.defaultValue || '';
-                return formatInputForPython(rawValue, arg.type);
-            });
-
-            // Check if all required args have values
-            const emptyArgs = parsedArgs.filter((arg, i) => !argValues[i] && !arg.defaultValue);
-            if (emptyArgs.length > 0) {
-                setOutput({
-                    success: false,
-                    error: `Missing required argument(s): ${emptyArgs.map(a => a.name).join(', ')}`
-                });
-                setIsLoading(false);
-                return;
-            }
-
-            const result = await onExecuteFunction(name, argValues);
-            setOutput(result);
-        } catch (err) {
-            setOutput({
-                success: false,
-                error: err instanceof Error ? err.message : 'Unknown error'
-            });
+            const args = func.parameters.map(p => inputValues[p.name] || '');
+            setCurrentInputArgs(args);
+            const response = await onExecute(func.name, args, filePath);
+            setResult(response);
+        } catch (e: any) {
+            setResult({ success: false, error: e.message });
         } finally {
-            setIsLoading(false);
+            setIsRunning(false);
         }
     };
 
-    const handleHeaderClick = () => {
-        onGoToLine(lineStart);
-    };
+    const handleExplainError = async () => {
+        if (!result || result.success || !result.error) return;
 
-    const handleToggleExpand = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setIsExpanded(!isExpanded);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleExecute();
+        setIsExplainingError(true);
+        setErrorExplanation(null);
+        try {
+            const explanation = await onExplainError(func.name, func.code, result.error, currentInputArgs);
+            setErrorExplanation(explanation);
+        } catch (e: any) {
+            setError(`Could not explain error: ${e.message}`);
+        } finally {
+            setIsExplainingError(false);
         }
+    };
+
+    const handleQuickFix = async () => {
+        if (!result || result.success || !result.error) return;
+
+        setIsGeneratingFix(true);
+        setFixedCode(null);
+        try {
+            const fixed = await onQuickFix(func.name, func.code, result.error, currentInputArgs);
+            setFixedCode(fixed);
+        } catch (e: any) {
+            setError(`Could not generate fix: ${e.message}`);
+        } finally {
+            setIsGeneratingFix(false);
+        }
+    };
+
+    const handleApplyQuickFix = () => {
+        if (!fixedCode) return;
+
+        postMessage({
+            type: 'applyFix',
+            payload: {
+                functionName: func.name,
+                functionCode: fixedCode,
+                issue: result?.error || 'Error fix',
+                lineStart: func.lineStart,
+                lineEnd: func.lineEnd
+            }
+        });
+    };
+
+    const handleEdgeCases = async () => {
+        setIsLoadingEdges(true);
+        setError(null);
+        try {
+            const cases = await onEdgeCases(func.name, func.code);
+            setEdgeCases(cases);
+        } catch (e: any) {
+            setError(`Edge cases failed: ${e.message}`);
+        } finally {
+            setIsLoadingEdges(false);
+        }
+    };
+
+    const handleAudit = async () => {
+        setIsLoadingAudit(true);
+        setError(null);
+        try {
+            const result = await onAudit(func.name, func.code);
+            setAuditResult(result);
+        } catch (e: any) {
+            setError(`Audit failed: ${e.message}`);
+        } finally {
+            setIsLoadingAudit(false);
+        }
+    };
+
+    const handleSummarize = async () => {
+        setIsLoadingSummary(true);
+        setError(null);
+        try {
+            const result = await onSummarize(func.name, func.code);
+            setSummary(result);
+        } catch (e: any) {
+            setError(`Summary failed: ${e.message}`);
+        } finally {
+            setIsLoadingSummary(false);
+        }
+    };
+
+    const applyEdgeCase = (edgeCase: EdgeCase) => {
+        const args = edgeCase.inputArgs.split(',').map(a => a.trim());
+        func.parameters.forEach((param, index) => {
+            if (args[index]) {
+                setInputValues(prev => ({ ...prev, [param.name]: args[index] }));
+            }
+        });
+    };
+
+    const handleApplyFix = (issue: any) => {
+        postMessage({
+            type: 'applyFix',
+            payload: {
+                functionName: func.name,
+                functionCode: func.code,
+                issue: issue.issue,
+                lineStart: func.lineStart,
+                lineEnd: func.lineEnd
+            }
+        });
+    };
+
+    const goToLine = () => {
+        postMessage({
+            type: 'goToLine',
+            payload: { lineNumber: func.lineStart }
+        });
+    };
+
+    const getRiskBadge = () => {
+        if (!auditResult) return null;
+        const score = auditResult.riskScore;
+        const color = score < 30 ? '#89d185' : score < 70 ? '#cca700' : '#f14c4c';
+        const label = score < 30 ? 'LOW' : score < 70 ? 'MEDIUM' : 'HIGH';
+        return (
+            <span className="risk-badge" style={{ backgroundColor: color }}>
+                {label} {score}
+            </span>
+        );
     };
 
     return (
-        <article className="atomic-card">
-            <header
-                className="card-header card-header-clickable"
-                onClick={handleHeaderClick}
-                title={`Click to go to line ${lineStart}`}
-            >
+        <div className="atomic-card">
+            {/* Header */}
+            <div className="card-header">
                 <div className="function-info">
-                    <span className="function-name">{name}</span>
-                    <span className="function-args">({args})</span>
+                    <span className="function-name" onClick={goToLine}>
+                        {func.name}
+                    </span>
+                    <span className="function-params">
+                        ({func.parameters.map(p => `${p.name}: ${p.type}`).join(', ')})
+                    </span>
+                    {getRiskBadge()}
                 </div>
-                <div className="header-actions">
-                    <button
-                        className="expand-button"
-                        onClick={handleToggleExpand}
-                        title={isExpanded ? 'Collapse' : 'Expand'}
-                    >
-                        {isExpanded ? '▼' : '▶'}
+                <div className="card-actions">
+                    <button className="icon-btn" onClick={() => onOpenChat(func.name, func.code)} title="Chat">
+                        Chat
                     </button>
-                    <span className="line-badge">L{lineStart}-{lineEnd}</span>
+                    <button className="icon-btn" onClick={() => setIsExpanded(!isExpanded)} title="Toggle">
+                        {isExpanded ? '▲' : '▼'}
+                    </button>
+                    <span className="line-badge">L{func.lineStart}-{func.lineEnd}</span>
                 </div>
-            </header>
+            </div>
 
+            {/* Code Block */}
             {isExpanded && (
-                <>
-                    <div className="card-body">
-                        <pre className="code-block">
-                            <code>{body}</code>
-                        </pre>
-                    </div>
+                <pre className="code-block">
+                    <code>{func.code}</code>
+                </pre>
+            )}
 
-                    {/* Test Section */}
-                    <div className="test-section">
-                        <div className="test-header">
-                            <span className="test-title">🧪 Test Function</span>
+            {/* AI Action Buttons */}
+            <div className="ai-buttons">
+                <button
+                    className="ai-btn edge-btn"
+                    onClick={handleEdgeCases}
+                    disabled={isLoadingEdges}
+                >
+                    {isLoadingEdges ? 'Loading...' : 'Edge Cases'}
+                </button>
+                <button
+                    className="ai-btn audit-btn"
+                    onClick={handleAudit}
+                    disabled={isLoadingAudit}
+                >
+                    {isLoadingAudit ? 'Loading...' : 'Audit'}
+                </button>
+                <button
+                    className="ai-btn summary-btn"
+                    onClick={handleSummarize}
+                    disabled={isLoadingSummary}
+                >
+                    {isLoadingSummary ? 'Loading...' : 'Summarize'}
+                </button>
+            </div>
+
+            {/* Error Display */}
+            {error && (
+                <div className="error-box">
+                    {error}
+                </div>
+            )}
+
+            {/* Summary Display */}
+            {summary && (
+                <div className="summary-box">
+                    <h4>Function Summary</h4>
+                    <div className="summary-item"><strong>Purpose:</strong> {summary.purpose}</div>
+                    <div className="summary-item"><strong>Inputs:</strong> {summary.inputs}</div>
+                    <div className="summary-item"><strong>Outputs:</strong> {summary.outputs}</div>
+                    <div className="summary-item"><strong>Complexity:</strong> {summary.complexity}</div>
+                </div>
+            )}
+
+            {/* Edge Cases Display */}
+            {edgeCases && edgeCases.length > 0 && (
+                <div className="edge-cases-box">
+                    <h4>Test Cases (Priority Order)</h4>
+                    {edgeCases.map((ec, i) => (
+                        <div
+                            key={i}
+                            className={`edge-case severity-${ec.severity}`}
+                            onClick={() => applyEdgeCase(ec)}
+                        >
+                            <span className={`severity-badge ${ec.severity}`}>{ec.severity.toUpperCase()}</span>
+                            <code>{ec.inputArgs}</code>
+                            <span className="edge-reason">{ec.reason}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Audit Results Display */}
+            {auditResult && auditResult.issues.length > 0 && (
+                <div className="audit-box">
+                    <h4>Security & Performance Issues ({auditResult.issues.length})</h4>
+                    {auditResult.issues.map((issue, i) => (
+                        <div key={i} className={`audit-issue severity-${issue.severity}`}>
+                            <span className={`severity-badge ${issue.severity}`}>
+                                {issue.severity.toUpperCase()}
+                            </span>
+                            <span className="issue-type">{issue.type}</span>
+                            <p>{issue.issue}</p>
+                            {issue.fixCode && (
+                                <button
+                                    className="apply-fix-btn"
+                                    onClick={() => handleApplyFix(issue)}
+                                >
+                                    Apply Fix
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {auditResult && auditResult.issues.length === 0 && (
+                <div className="audit-box success">
+                    <h4>No Issues Found</h4>
+                    <p>Risk Score: {auditResult.riskScore}</p>
+                </div>
+            )}
+
+            {/* Test Function Section */}
+            <div className="test-section">
+                <h4>Test Function {!canExecute && <span className="lang-badge-inline">(Requires Compiler)</span>}</h4>
+
+                {canExecute ? (
+                    <>
+                        <div className="params-grid">
+                            {func.parameters.map(param => (
+                                <div key={param.name} className="param-input">
+                                    <label>{param.name}: <span className="type-hint">{param.type}</span></label>
+                                    <input
+                                        type="text"
+                                        value={inputValues[param.name] || ''}
+                                        onChange={(e) => handleInputChange(param.name, e.target.value)}
+                                        placeholder={param.defaultValue || `Enter ${param.type}`}
+                                    />
+                                </div>
+                            ))}
                         </div>
 
-                        {parsedArgs.length > 0 ? (
-                            <div className="input-grid">
-                                {parsedArgs.map((arg) => (
-                                    <div key={arg.name} className="input-group">
-                                        <label className="input-label">
-                                            {arg.name}
-                                            <span className="type-hint">: {arg.type}</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="param-input"
-                                            placeholder={getPlaceholder(arg)}
-                                            value={inputValues[arg.name] || ''}
-                                            onChange={(e) => handleInputChange(arg.name, e.target.value)}
-                                            onKeyDown={handleKeyDown}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="no-params">No parameters required</p>
-                        )}
-
                         <button
-                            className="run-button"
-                            onClick={handleExecute}
-                            disabled={isLoading}
+                            className="run-btn"
+                            onClick={handleRun}
+                            disabled={isRunning}
                         >
-                            {isLoading ? (
-                                <>
-                                    <span className="spinner"></span>
-                                    Running...
-                                </>
-                            ) : (
-                                '▶ Run'
-                            )}
+                            {isRunning ? 'Running...' : 'Run'}
                         </button>
 
-                        {/* Output Section */}
-                        {output && (
-                            <div className={`output-section ${output.success ? 'output-success' : 'output-error'}`}>
-                                <div className="output-header">
-                                    {output.success ? '✅ Result' : '❌ Error'}
+                        {/* Success Result */}
+                        {result && result.success && (
+                            <div className="result-box success">
+                                <span className="result-label">Result</span>
+                                <pre className="result-value">{result.result}</pre>
+                            </div>
+                        )}
+
+                        {/* Error Result with Explain and Quick Fix Buttons */}
+                        {result && !result.success && (
+                            <div className="result-box error">
+                                <span className="result-label">Error</span>
+                                <pre className="result-value">{result.error}</pre>
+
+                                <div className="error-actions">
+                                    {!errorExplanation && (
+                                        <button
+                                            className="explain-error-btn"
+                                            onClick={handleExplainError}
+                                            disabled={isExplainingError}
+                                        >
+                                            {isExplainingError ? 'Analyzing...' : 'Explain Error'}
+                                        </button>
+                                    )}
+
+                                    {!fixedCode && (
+                                        <button
+                                            className="quick-fix-btn"
+                                            onClick={handleQuickFix}
+                                            disabled={isGeneratingFix}
+                                        >
+                                            {isGeneratingFix ? 'Generating Fix...' : 'Quick Fix'}
+                                        </button>
+                                    )}
                                 </div>
-                                <pre className="output-content">
-                                    {output.success ? output.result : output.error}
-                                </pre>
+
+                                {errorExplanation && (
+                                    <div className="error-explanation">
+                                        <div className="explanation-section">
+                                            <strong>Error Type:</strong>
+                                            <p>{errorExplanation.error}</p>
+                                        </div>
+                                        <div className="explanation-section">
+                                            <strong>Why this happened:</strong>
+                                            <p>{errorExplanation.explanation}</p>
+                                        </div>
+                                        <div className="explanation-section">
+                                            <strong>Expected input:</strong>
+                                            <p>{errorExplanation.expectedInput}</p>
+                                        </div>
+                                        <div className="explanation-section">
+                                            <strong>Suggestion:</strong>
+                                            <p>{errorExplanation.suggestion}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {fixedCode && (
+                                    <div className="quick-fix-result">
+                                        <h5>AI Generated Fix:</h5>
+                                        <pre className="fixed-code">{fixedCode}</pre>
+                                        <button
+                                            className="apply-quick-fix-btn"
+                                            onClick={handleApplyQuickFix}
+                                        >
+                                            Apply This Fix to Code
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
+                    </>
+                ) : (
+                    <div className="lang-notice">
+                        <p>Requires {language.toUpperCase()} compiler installed (gcc/g++/go).</p>
+                        <p>Use <strong>Edge Cases</strong>, <strong>Audit</strong>, and <strong>Summarize</strong> for AI analysis.</p>
                     </div>
-
-                    <footer className="card-footer">
-                        <button
-                            className="scan-button"
-                            onClick={() => onScanRisk(name)}
-                            title="Scan this function for security risks (Coming Soon)"
-                        >
-                            🔍 Scan Risk
-                        </button>
-                    </footer>
-                </>
-            )}
-        </article>
+                )}
+            </div>
+        </div>
     );
 };
-
-export default AtomicCard;

@@ -1,4 +1,4 @@
 import React from 'react';
-declare const App: React.FC;
-export default App;
+import './styles.css';
+export declare const App: React.FC;
 //# sourceMappingURL=App.d.ts.map
