@@ -107,6 +107,16 @@ function updateDashboard(document: vscode.TextDocument): void {
 
     const functions = parseFunctions(sourceCode, fileName);
 
+    // [New Flow] Add "Whole File" as the first item so user can scan everything
+    functions.unshift({
+        name: 'Whole File (All Code)',
+        parameters: [],
+        code: sourceCode,
+        lineStart: 1,
+        lineEnd: document.lineCount,
+        language: language
+    });
+
     console.log('[Extension] Found', functions.length, 'functions');
 
     dashboardPanel.updateFunctions(fileName, filePath, functions, sourceCode, language);
