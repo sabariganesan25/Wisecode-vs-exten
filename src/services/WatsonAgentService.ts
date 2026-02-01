@@ -366,10 +366,15 @@ Return your response as valid JSON only:
             const response = await this.queryAgent(systemPrompt, fullCode);
             const match = response.match(/\{[\s\S]*\}/);
             if (match) return JSON.parse(match[0]);
-        } catch (e) {
+        } catch (e: any) {
             console.error('[Watsonx] Guide error:', e);
         }
-        throw new Error('Failed to generate guide');
+        // Fallback: Return meaningful default instead of crashing UI
+        return {
+            summary: 'Unable to generate guide - API error or timeout. Please try again.',
+            workflow: [{ step: 1, function: 'N/A', description: 'Unable to analyze workflow. Try refreshing.' }],
+            dependencies: ['Unable to detect dependencies.']
+        };
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -391,10 +396,16 @@ Return as valid JSON only:
             const response = await this.queryAgent(systemPrompt, functionCode);
             const match = response.match(/\{[\s\S]*\}/);
             if (match) return JSON.parse(match[0]);
-        } catch (e) {
+        } catch (e: any) {
             console.error('[Watsonx] Summary error:', e);
         }
-        throw new Error('Failed to generate summary');
+        // Fallback: Return meaningful default instead of crashing UI
+        return {
+            purpose: 'Unable to summarize - API error or timeout. Please try again.',
+            inputs: 'See function parameters.',
+            outputs: 'See function return statement.',
+            complexity: 'Unable to analyze.'
+        };
     }
 
     // ═══════════════════════════════════════════════════════════════
