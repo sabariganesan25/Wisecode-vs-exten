@@ -519,7 +519,9 @@ Make sure the code is valid ${language} syntax.`;
                 java: /((?:public|private|protected)?\s*(?:static)?\s*\w+\s+\w+\s*\([^)]*\)\s*\{[\s\S]*?\n\s*\})/,
                 go: /(func\s+[\s\S]*?\n\})/,
                 javascript: /((?:function|const|let|var)\s+\w+[\s\S]*?\n\})/,
-                typescript: /((?:function|const|let|var|export)\s+\w+[\s\S]*?\n\})/
+                typescript: /((?:function|const|let|var|export)\s+\w+[\s\S]*?\n\})/,
+                c: /((?:int|void|char|idx|double|float)\s+\w+\s*\([^)]*\)\s*\{[\s\S]*?\n\s*\})/,
+                cpp: /((?:int|void|char|idx|double|float|auto)\s+\w+\s*\([^)]*\)\s*\{[\s\S]*?\n\s*\})/
             };
 
             // Try to extract code block

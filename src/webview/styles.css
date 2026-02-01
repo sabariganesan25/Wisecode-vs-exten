@@ -98,11 +98,7 @@ body {
     gap: 10px;
 }
 
-.app-title::before {
-    content: "🛡️";
-    -webkit-text-fill-color: initial;
-    filter: drop-shadow(0 0 10px rgba(123, 44, 191, 0.3));
-}
+
 
 .file-badge {
     font-family: var(--font-mono);

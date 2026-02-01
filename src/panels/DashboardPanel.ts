@@ -910,7 +910,10 @@ func main() {
             {
                 enableScripts: true,
                 retainContextWhenHidden: true,
-                localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'out')]
+                localResourceRoots: [
+                    vscode.Uri.joinPath(extensionUri, 'out'),
+                    vscode.Uri.joinPath(extensionUri, 'images')
+                ]
             }
         );
 
@@ -954,6 +957,7 @@ func main() {
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'out', 'webview.js'));
+        const logoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'images', 'icon.png'));
         const nonce = this._getNonce();
 
         return `<!DOCTYPE html>
@@ -961,11 +965,14 @@ func main() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data:; script-src 'nonce-${nonce}';">
     <title>Wisecode Dashboard</title>
 </head>
 <body>
     <div id="root"></div>
+    <script nonce="${nonce}">
+        window.logoUri = "${logoUri}";
+    </script>
     <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;

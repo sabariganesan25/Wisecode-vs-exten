@@ -6,6 +6,12 @@ import { GuidePanel } from './components/GuidePanel';
 import { postMessage } from './vscodeApi';
 import './styles.css';
 
+declare global {
+    interface Window {
+        logoUri?: string;
+    }
+}
+
 interface EdgeCase {
     inputArgs: string;
     reason: string;
@@ -479,7 +485,10 @@ export const App: React.FC = () => {
         <div className="app-container">
             <header className="app-header">
                 <div className="header-left">
-                    <div className="app-title">Wisecode AI</div>
+                    <div className="app-title">
+                        <div style={{ width: '32px', height: '32px', marginRight: '8px' }}></div>
+                        Wisecode AI
+                    </div>
                     {state.fileName ? (
                         <span className="file-badge">{state.fileName}</span>
                     ) : (

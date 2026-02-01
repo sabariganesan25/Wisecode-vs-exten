@@ -3,6 +3,7 @@
   "displayName": "Wisecode AI: Compliance & Security",
   "description": "Enterprise-grade AI security agent for automated code compliance, auditing, and self-healing.",
   "version": "1.1.0",
+  "icon": "images/icon.png",
   "publisher": "wisecode-systems",
   "engines": {
     "vscode": "^1.85.0"
