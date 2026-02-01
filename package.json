@@ -5,6 +5,10 @@
   "version": "1.1.0",
   "icon": "images/icon.png",
   "publisher": "wisecode-systems",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sabariganesan25/Wisecode-vsexx.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
