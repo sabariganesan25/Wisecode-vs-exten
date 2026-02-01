@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+.coverage
+.rp
+.vscode-test
+
+# Production
+out
+dist
+build
+
+# Misc
+.DS_Store
+*.log
+
+# Environment Variables (Secrets)
+.env
+watson.config.json
+.vscode/settings.json
+
+# IDE
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

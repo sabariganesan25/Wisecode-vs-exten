@@ -1,9 +1,9 @@
 {
-  "name": "sentinel-atomic",
-  "displayName": "Sentinel Atomic Pro",
-  "description": "AI-Powered Agentic Security Workstation for Python",
-  "version": "1.0.0",
-  "publisher": "sentinel",
+  "name": "wisecode-ai",
+  "displayName": "Wisecode AI: Compliance & Security",
+  "description": "Enterprise-grade AI security agent for automated code compliance, auditing, and self-healing.",
+  "version": "1.1.0",
+  "publisher": "wisecode-systems",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -13,30 +13,37 @@
     "Linters"
   ],
   "activationEvents": [
-    "onLanguage:python"
+    "onLanguage:python",
+    "onLanguage:java",
+    "onLanguage:go",
+    "onLanguage:c",
+    "onLanguage:cpp",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "sentinel.openDashboard",
-        "title": "Sentinel: Open Dashboard"
+        "command": "wisecode.openDashboard",
+        "title": "Wisecode: Open Dashboard"
       }
     ],
     "configuration": {
-      "title": "Sentinel Atomic Pro",
+      "title": "Wisecode AI",
       "properties": {
-        "sentinel.ibmApiKey": {
+        "wisecode.ibmApiKey": {
           "type": "string",
           "default": "",
           "description": "IBM Cloud API Key for Watsonx AI"
         },
-        "sentinel.projectId": {
+        "wisecode.projectId": {
           "type": "string",
           "default": "",
           "description": "IBM Watsonx Project ID"
         },
-        "sentinel.region": {
+        "wisecode.region": {
           "type": "string",
           "default": "us-south",
           "enum": [
@@ -71,6 +78,7 @@
   "dependencies": {
     "@ibm-cloud/watsonx-ai": "^1.7.7",
     "axios": "^1.13.4",
+    "dotenv": "^17.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

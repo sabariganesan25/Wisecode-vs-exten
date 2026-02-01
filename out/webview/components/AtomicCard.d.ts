@@ -31,6 +31,18 @@ interface ExecuteResult {
     result?: string;
     error?: string;
 }
+interface ComplianceViolation {
+    regulation: 'GDPR' | 'HIPAA' | 'PCI-DSS' | 'SECURITY' | 'OTHER';
+    issue: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    line?: number;
+    suggestion: string;
+}
+interface ComplianceResult {
+    isCompliant: boolean;
+    overallScore: number;
+    violations: ComplianceViolation[];
+}
 interface AtomicCardProps {
     func: PythonFunction;
     onExecute: (functionName: string, args: string[], filePath: string) => Promise<ExecuteResult>;
@@ -40,6 +52,8 @@ interface AtomicCardProps {
     onOpenChat: (functionName: string, functionCode: string) => void;
     onExplainError: (functionName: string, functionCode: string, errorMessage: string, inputArgs: string[]) => Promise<ErrorExplanation>;
     onQuickFix: (functionName: string, functionCode: string, errorMessage: string, inputArgs: string[]) => Promise<string>;
+    onCheckCompliance: (functionName: string, functionCode: string) => Promise<ComplianceResult>;
+    onFixCompliance: (functionName: string, functionCode: string, violations: ComplianceViolation[]) => Promise<string>;
     filePath: string;
     language: string;
     canExecute: boolean;

@@ -8,7 +8,7 @@ import { watsonService } from '../services/WatsonAgentService';
 
 export class DashboardPanel {
     public static currentPanel: DashboardPanel | undefined;
-    public static readonly viewType = 'sentinelDashboard';
+    public static readonly viewType = 'wisecodeDashboard';
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
@@ -16,6 +16,8 @@ export class DashboardPanel {
     private _currentFilePath: string = '';
     private _currentFileContent: string = '';
     private _currentLanguage: string = 'python';
+    private _webviewReady: boolean = false;
+    private _pendingUpdate: { fileName: string; filePath: string; functions: CodeFunction[]; fileContent: string; language: string } | null = null;
 
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
         this._panel = panel;
@@ -29,6 +31,16 @@ export class DashboardPanel {
 
                 try {
                     switch (message.type) {
+                        case 'webviewReady':
+                            console.log('[Dashboard] Webview is ready!');
+                            this._webviewReady = true;
+                            // Send any pending update
+                            if (this._pendingUpdate) {
+                                console.log('[Dashboard] Sending pending update');
+                                this._sendUpdate(this._pendingUpdate.fileName, this._pendingUpdate.filePath, this._pendingUpdate.functions, this._pendingUpdate.fileContent, this._pendingUpdate.language);
+                                this._pendingUpdate = null;
+                            }
+                            break;
                         case 'goToLine':
                             this._goToLine(message.payload.lineNumber);
                             break;
@@ -58,6 +70,21 @@ export class DashboardPanel {
                             break;
                         case 'quickFix':
                             await this._handleQuickFix(message.payload);
+                            break;
+                        case 'checkCompliance':
+                            await this._handleCheckCompliance(message.payload);
+                            break;
+                        case 'fixCompliance':
+                            await this._handleFixCompliance(message.payload);
+                            break;
+                        case 'checkFullFileCompliance':
+                            await this._handleCheckFullFileCompliance(message.payload);
+                            break;
+                        case 'fixFullFileCompliance':
+                            await this._handleFixFullFileCompliance(message.payload);
+                            break;
+                        case 'applyFullFileFix':
+                            await this._handleApplyFullFileFix(message.payload);
                             break;
                     }
                 } catch (error: any) {
@@ -99,6 +126,160 @@ export class DashboardPanel {
                 type: 'quickFixResult',
                 payload: { requestId, success: false, error: error.message }
             });
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // COMPLIANCE CHECK HANDLER - Government Regulation Analysis
+    // ═══════════════════════════════════════════════════════════════
+
+    private async _handleCheckCompliance(payload: any): Promise<void> {
+        const { requestId, functionName, functionCode } = payload;
+        console.log('[Dashboard] Compliance check for:', functionName);
+
+        try {
+            vscode.window.showInformationMessage('Checking government regulation compliance...');
+
+            const result = await watsonService.checkCompliance(
+                functionCode,
+                functionName,
+                this._currentLanguage
+            );
+
+            this._panel.webview.postMessage({
+                type: 'complianceResult',
+                payload: { requestId, success: true, ...result }
+            });
+        } catch (error: any) {
+            console.error('[Dashboard] Compliance check failed:', error);
+            this._panel.webview.postMessage({
+                type: 'complianceResult',
+                payload: { requestId, success: false, error: error.message }
+            });
+        }
+    }
+
+    private async _handleFixCompliance(payload: any): Promise<void> {
+        const { requestId, functionName, functionCode, violations } = payload;
+        console.log('[Dashboard] Fix compliance for:', functionName);
+
+        try {
+            vscode.window.showInformationMessage('Generating compliant code with IBM Watsonx AI...');
+
+            const fixedCode = await watsonService.fixCompliance(
+                functionCode,
+                functionName,
+                violations,
+                this._currentLanguage
+            );
+
+            this._panel.webview.postMessage({
+                type: 'fixComplianceResult',
+                payload: { requestId, success: true, fixedCode }
+            });
+        } catch (error: any) {
+            console.error('[Dashboard] Fix compliance failed:', error);
+            this._panel.webview.postMessage({
+                type: 'fixComplianceResult',
+                payload: { requestId, success: false, error: error.message }
+            });
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FULL FILE COMPLIANCE HANDLERS - Scans entire code file
+    // ═══════════════════════════════════════════════════════════════
+
+    private async _handleCheckFullFileCompliance(payload: any): Promise<void> {
+        const { requestId } = payload;
+        const fileName = this._currentFilePath.split(/[/\\]/).pop() || 'Unknown';
+        console.log('[Dashboard] Full file compliance check for:', fileName);
+
+        try {
+            vscode.window.showInformationMessage('🔍 Scanning entire file for government regulation compliance...');
+
+            const result = await watsonService.checkFullFileCompliance(
+                this._currentFileContent,
+                fileName,
+                this._currentLanguage
+            );
+
+            this._panel.webview.postMessage({
+                type: 'fullFileComplianceResult',
+                payload: { requestId, success: true, ...result }
+            });
+
+            // If not compliant, show notification
+            if (!result.isCompliant) {
+                vscode.window.showWarningMessage(
+                    `⚠️ Found ${result.violations.length} compliance violation(s) in ${fileName}`
+                );
+            } else {
+                vscode.window.showInformationMessage('✅ File is fully compliant with government regulations!');
+            }
+        } catch (error: any) {
+            console.error('[Dashboard] Full file compliance check failed:', error);
+            this._panel.webview.postMessage({
+                type: 'fullFileComplianceResult',
+                payload: { requestId, success: false, error: error.message }
+            });
+        }
+    }
+
+    private async _handleFixFullFileCompliance(payload: any): Promise<void> {
+        const { requestId, violations } = payload;
+        const fileName = this._currentFilePath.split(/[/\\]/).pop() || 'Unknown';
+        console.log('[Dashboard] Fix full file compliance. Violations:', violations?.length);
+
+        try {
+            vscode.window.showInformationMessage('🔧 Generating compliant code for entire file...');
+
+            const fixedCode = await watsonService.fixFullFileCompliance(
+                this._currentFileContent,
+                fileName,
+                violations,
+                this._currentLanguage
+            );
+
+            this._panel.webview.postMessage({
+                type: 'fixFullFileComplianceResult',
+                payload: { requestId, success: true, fixedCode }
+            });
+        } catch (error: any) {
+            console.error('[Dashboard] Fix full file compliance failed:', error);
+            this._panel.webview.postMessage({
+                type: 'fixFullFileComplianceResult',
+                payload: { requestId, success: false, error: error.message }
+            });
+        }
+    }
+
+    private async _handleApplyFullFileFix(payload: any): Promise<void> {
+        const { fixedCode } = payload;
+        console.log('[Dashboard] Applying full file fix to:', this._currentFilePath);
+
+        try {
+            if (!this._currentFilePath) {
+                throw new Error('No active file path');
+            }
+
+            const document = await vscode.workspace.openTextDocument(this._currentFilePath);
+            const editor = await vscode.window.showTextDocument(document);
+
+            // Replace entire file content
+            const lastLine = document.lineAt(document.lineCount - 1);
+            const range = new vscode.Range(0, 0, document.lineCount - 1, lastLine.text.length);
+
+            await editor.edit(editBuilder => {
+                editBuilder.replace(range, fixedCode);
+            });
+
+            await document.save();
+            vscode.window.showInformationMessage('✅ Applied government compliance fixes to the entire file.');
+
+        } catch (error: any) {
+            console.error('[Dashboard] Failed to apply full file fix:', error);
+            vscode.window.showErrorMessage(`Failed to apply fix: ${error.message}`);
         }
     }
 
@@ -368,16 +549,19 @@ export class DashboardPanel {
         }
     }
 
-    // Auto-quote strings for any language
+    // Auto-quote strings for any language - filter out empty args
     private _processArgs(args: string[]): string[] {
-        return args.map((arg: string) => {
-            if (!arg) return arg;
-            if (!isNaN(Number(arg))) return arg;
-            if (arg.startsWith('"') || arg.startsWith("'")) return arg;
-            if (arg.startsWith('[') || arg.startsWith('{')) return arg;
-            if (arg === 'null' || arg === 'None' || arg === 'nil' || arg === 'true' || arg === 'false') return arg;
-            return `"${arg}"`;
-        });
+        return args
+            .filter((arg: string) => arg !== undefined && arg !== null && arg.trim() !== '')
+            .map((arg: string) => {
+                const trimmed = arg.trim();
+                if (!trimmed) return trimmed;
+                if (!isNaN(Number(trimmed))) return trimmed;
+                if (trimmed.startsWith('"') || trimmed.startsWith("'")) return trimmed;
+                if (trimmed.startsWith('[') || trimmed.startsWith('{')) return trimmed;
+                if (trimmed === 'null' || trimmed === 'None' || trimmed === 'nil' || trimmed === 'true' || trimmed === 'false') return trimmed;
+                return `"${trimmed}"`;
+            });
     }
 
     private async _executePython(functionName: string, args: string[], filePath: string): Promise<{ success: boolean; result?: string; error?: string }> {
@@ -600,8 +784,8 @@ int main() {
 }
 `;
 
-        const runnerFile = path.join(dirPath, `sentinel_runner_${timestamp}.cpp`);
-        const exeFile = path.join(dirPath, `sentinel_runner_${timestamp}${process.platform === 'win32' ? '.exe' : ''}`);
+        const runnerFile = path.join(dirPath, `wisecode_runner_${timestamp}.cpp`);
+        const exeFile = path.join(dirPath, `wisecode_runner_${timestamp}${process.platform === 'win32' ? '.exe' : ''}`);
         fs.writeFileSync(runnerFile, cppCode, 'utf8');
 
         try {
@@ -664,12 +848,12 @@ func main() {
 }
 `;
 
-        const runnerFile = path.join(dirPath, `sentinel_runner_${timestamp}.go`);
+        const runnerFile = path.join(dirPath, `wisecode_runner_${timestamp}.go`);
         fs.writeFileSync(runnerFile, goCode, 'utf8');
 
         try {
             // Run with go run (runs both files together)
-            const output = await this._runCommand('go', ['run', path.basename(filePath), `sentinel_runner_${timestamp}.go`], dirPath);
+            const output = await this._runCommand('go', ['run', path.basename(filePath), `wisecode_runner_${timestamp}.go`], dirPath);
 
             // Cleanup
             try { fs.unlinkSync(runnerFile); } catch { }
@@ -721,7 +905,7 @@ func main() {
 
         const panel = vscode.window.createWebviewPanel(
             DashboardPanel.viewType,
-            'Sentinel Dashboard',
+            'Wisecode Dashboard',
             column,
             {
                 enableScripts: true,
@@ -739,11 +923,19 @@ func main() {
         this._currentFileContent = fileContent;
         this._currentLanguage = language;
 
+        if (this._webviewReady) {
+            this._sendUpdate(fileName, filePath, functions, fileContent, language);
+        } else {
+            console.log('[Dashboard] Webview not ready, queueing update for:', fileName);
+            this._pendingUpdate = { fileName, filePath, functions, fileContent, language };
+        }
+    }
+
+    private _sendUpdate(fileName: string, filePath: string, functions: CodeFunction[], fileContent: string, language: string): void {
         const isConfigured = watsonService.isConfigured();
-        // All languages can now execute
         const canExecute = ['python', 'java', 'javascript', 'typescript', 'c', 'cpp', 'go'].includes(language);
 
-        console.log('[Dashboard] Update:', fileName, '- Lang:', language, '- Functions:', functions.length, '- Execute:', canExecute);
+        console.log('[Dashboard] Sending update:', fileName, '- Lang:', language, '- Functions:', functions.length, '- Configured:', isConfigured);
 
         this._panel.webview.postMessage({
             type: 'updateFunctions',
@@ -770,7 +962,7 @@ func main() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
-    <title>Sentinel Dashboard</title>
+    <title>Wisecode Dashboard</title>
 </head>
 <body>
     <div id="root"></div>

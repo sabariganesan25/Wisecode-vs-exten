@@ -38,6 +38,20 @@ interface ExecuteResult {
     error?: string;
 }
 
+interface ComplianceViolation {
+    regulation: 'GDPR' | 'HIPAA' | 'PCI-DSS' | 'SECURITY' | 'OTHER';
+    issue: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    line?: number;
+    suggestion: string;
+}
+
+interface ComplianceResult {
+    isCompliant: boolean;
+    overallScore: number;
+    violations: ComplianceViolation[];
+}
+
 interface AtomicCardProps {
     func: PythonFunction;
     onExecute: (functionName: string, args: string[], filePath: string) => Promise<ExecuteResult>;
@@ -47,6 +61,8 @@ interface AtomicCardProps {
     onOpenChat: (functionName: string, functionCode: string) => void;
     onExplainError: (functionName: string, functionCode: string, errorMessage: string, inputArgs: string[]) => Promise<ErrorExplanation>;
     onQuickFix: (functionName: string, functionCode: string, errorMessage: string, inputArgs: string[]) => Promise<string>;
+    onCheckCompliance: (functionName: string, functionCode: string) => Promise<ComplianceResult>;
+    onFixCompliance: (functionName: string, functionCode: string, violations: ComplianceViolation[]) => Promise<string>;
     filePath: string;
     language: string;
     canExecute: boolean;
@@ -61,6 +77,8 @@ export const AtomicCard: React.FC<AtomicCardProps> = ({
     onOpenChat,
     onExplainError,
     onQuickFix,
+    onCheckCompliance,
+    onFixCompliance,
     filePath,
     language,
     canExecute
@@ -83,6 +101,12 @@ export const AtomicCard: React.FC<AtomicCardProps> = ({
     const [isExplainingError, setIsExplainingError] = useState(false);
     const [isGeneratingFix, setIsGeneratingFix] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Compliance state
+    const [complianceResult, setComplianceResult] = useState<ComplianceResult | null>(null);
+    const [complianceFixedCode, setComplianceFixedCode] = useState<string | null>(null);
+    const [isCheckingCompliance, setIsCheckingCompliance] = useState(false);
+    const [isFixingCompliance, setIsFixingCompliance] = useState(false);
 
     const handleInputChange = (paramName: string, value: string) => {
         setInputValues(prev => ({ ...prev, [paramName]: value }));
@@ -150,6 +174,56 @@ export const AtomicCard: React.FC<AtomicCardProps> = ({
                 lineEnd: func.lineEnd
             }
         });
+        // Clear error state immediately
+        setResult(null);
+        setFixedCode(null);
+    };
+
+    const handleCheckCompliance = async () => {
+        setIsCheckingCompliance(true);
+        setComplianceResult(null);
+        setComplianceFixedCode(null);
+        try {
+            const result = await onCheckCompliance(func.name, func.code);
+            setComplianceResult(result);
+        } catch (e: any) {
+            setError(`Could not check compliance: ${e.message}`);
+        } finally {
+            setIsCheckingCompliance(false);
+        }
+    };
+
+    const handleFixCompliance = async () => {
+        if (!complianceResult || complianceResult.isCompliant) return;
+
+        setIsFixingCompliance(true);
+        setComplianceFixedCode(null);
+        try {
+            const fixed = await onFixCompliance(func.name, func.code, complianceResult.violations);
+            setComplianceFixedCode(fixed);
+        } catch (e: any) {
+            setError(`Could not fix compliance: ${e.message}`);
+        } finally {
+            setIsFixingCompliance(false);
+        }
+    };
+
+    const handleApplyComplianceFix = () => {
+        if (!complianceFixedCode) return;
+
+        postMessage({
+            type: 'applyFix',
+            payload: {
+                functionName: func.name,
+                functionCode: complianceFixedCode,
+                issue: 'Compliance fix',
+                lineStart: func.lineStart,
+                lineEnd: func.lineEnd
+            }
+        });
+        // Clear compliance state immediately
+        setComplianceResult(null);
+        setComplianceFixedCode(null);
     };
 
     const handleEdgeCases = async () => {
@@ -234,6 +308,60 @@ export const AtomicCard: React.FC<AtomicCardProps> = ({
 
     return (
         <div className="atomic-card">
+            {/* Compliance Banner - Violations Only (Header Removed) */}
+            <div className="compliance-section">
+
+
+                {complianceResult && (
+                    <div className={`compliance-status ${complianceResult.isCompliant ? 'compliant' : 'non-compliant'}`}>
+                        <div className="compliance-summary">
+                            <span className="compliance-icon">
+                                {complianceResult.isCompliant ? '✅' : '⚠️'}
+                            </span>
+                            <span className="compliance-score">
+                                Score: {complianceResult.overallScore}/100
+                            </span>
+                            <span className="compliance-label">
+                                {complianceResult.isCompliant ? 'Compliant' : `${complianceResult.violations.length} Violation(s)`}
+                            </span>
+                        </div>
+
+                        {!complianceResult.isCompliant && complianceResult.violations.length > 0 && (
+                            <div className="compliance-violations">
+                                {complianceResult.violations.map((v, i) => (
+                                    <div key={i} className={`violation-item severity-${v.severity}`}>
+                                        <span className="violation-regulation">[{v.regulation}]</span>
+                                        <span className="violation-issue">{v.issue}</span>
+                                        <span className={`violation-severity ${v.severity}`}>{v.severity.toUpperCase()}</span>
+                                        <div className="violation-suggestion">💡 {v.suggestion}</div>
+                                    </div>
+                                ))}
+
+                                <button
+                                    className="fix-compliance-btn"
+                                    onClick={handleFixCompliance}
+                                    disabled={isFixingCompliance}
+                                >
+                                    {isFixingCompliance ? '⏳ Generating Fix...' : '🔧 Fix Compliance Issues'}
+                                </button>
+                            </div>
+                        )}
+
+                        {complianceFixedCode && (
+                            <div className="compliance-fix-result">
+                                <h4>✅ Compliant Code Generated:</h4>
+                                <pre className="fixed-code-block">
+                                    <code>{complianceFixedCode}</code>
+                                </pre>
+                                <button className="apply-fix-btn" onClick={handleApplyComplianceFix}>
+                                    Apply Compliance Fix
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
             {/* Header */}
             <div className="card-header">
                 <div className="function-info">
@@ -245,15 +373,8 @@ export const AtomicCard: React.FC<AtomicCardProps> = ({
                     </span>
                     {getRiskBadge()}
                 </div>
-                <div className="card-actions">
-                    <button className="icon-btn" onClick={() => onOpenChat(func.name, func.code)} title="Chat">
-                        Chat
-                    </button>
-                    <button className="icon-btn" onClick={() => setIsExpanded(!isExpanded)} title="Toggle">
-                        {isExpanded ? '▲' : '▼'}
-                    </button>
-                    <span className="line-badge">L{func.lineStart}-{func.lineEnd}</span>
-                </div>
+                {/* Actions Removed as per request */}
+
             </div>
 
             {/* Code Block */}

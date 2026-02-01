@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
 
 interface WatsonConfig {
     apiKey: string;
@@ -58,6 +59,20 @@ export interface ErrorExplanation {
     suggestion: string;
 }
 
+export interface ComplianceViolation {
+    regulation: 'GDPR' | 'HIPAA' | 'PCI-DSS' | 'SECURITY' | 'OTHER';
+    issue: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    line?: number;
+    suggestion: string;
+}
+
+export interface ComplianceResult {
+    isCompliant: boolean;
+    overallScore: number;
+    violations: ComplianceViolation[];
+}
+
 let extensionPath: string = '';
 
 export function setExtensionPath(extPath: string): void {
@@ -80,37 +95,74 @@ export class WatsonAgentService {
         return WatsonAgentService.instance;
     }
 
+
+
     private getConfig(): WatsonConfig | null {
         if (this.cachedConfig) {
             return this.cachedConfig;
         }
 
+        console.log('[Watsonx] Looking for config. Extension path:', extensionPath);
+
+        // 1. Try .env file first
+        const envPath = path.join(extensionPath, '.env');
+        if (fs.existsSync(envPath)) {
+            console.log('[Watsonx] Found .env at:', envPath);
+            dotenv.config({ path: envPath });
+
+            if (process.env.IBM_API_KEY && process.env.WATSONX_PROJECT_ID) {
+                console.log('[Watsonx] Config loaded from .env');
+                this.cachedConfig = {
+                    apiKey: process.env.IBM_API_KEY,
+                    projectId: process.env.WATSONX_PROJECT_ID,
+                    region: process.env.WATSONX_REGION || 'us-south'
+                };
+                return this.cachedConfig;
+            }
+        }
+
+        // 2. Fallback to watson.config.json
         const configPaths = [
             path.join(extensionPath, 'watson.config.json'),
-            'r:/ibm/sentinel-atomic/watson.config.json',
-            'R:/ibm/sentinel-atomic/watson.config.json'
+            'd:/code-vsextension/code2UI-vsCodeExtension/watson.config.json',
+            'D:/code-vsextension/code2UI-vsCodeExtension/watson.config.json',
+            'd:\\code-vsextension\\code2UI-vsCodeExtension\\watson.config.json',
+            path.join(process.cwd(), 'watson.config.json'),
+            'r:/ibm/wisecode-ai/watson.config.json',
+            'R:/ibm/wisecode-ai/watson.config.json'
         ];
 
         for (const configPath of configPaths) {
             try {
+                console.log('[Watsonx] Checking config at:', configPath);
                 if (fs.existsSync(configPath)) {
+                    console.log('[Watsonx] Found config at:', configPath);
                     const configContent = fs.readFileSync(configPath, 'utf8');
                     const config = JSON.parse(configContent);
 
-                    if (config.ibmApiKey && config.projectId) {
+                    // Support both new Wisecode keys and legacy standard keys
+                    const apiKey = config.wisecode?.ibmApiKey || config.ibmApiKey;
+                    const projectId = config.wisecode?.projectId || config.projectId;
+                    const region = config.wisecode?.region || config.region || 'us-south';
+
+                    if (apiKey && projectId) {
+                        console.log('[Watsonx] Config loaded successfully!');
                         this.cachedConfig = {
-                            apiKey: config.ibmApiKey,
-                            projectId: config.projectId,
-                            region: config.region || 'us-south'
+                            apiKey: apiKey,
+                            projectId: projectId,
+                            region: region
                         };
                         return this.cachedConfig;
+                    } else {
+                        console.log('[Watsonx] Config found but missing API key or User ID');
                     }
                 }
-            } catch (e) {
-                console.log('[Watsonx] Config not at:', configPath);
+            } catch (e: any) {
+                console.log('[Watsonx] Error reading config at:', configPath, e.message);
             }
         }
 
+        console.log('[Watsonx] No valid config found in any location');
         return null;
     }
 
@@ -126,22 +178,38 @@ export class WatsonAgentService {
             return this.accessToken;
         }
 
-        const axios = require('axios');
-        const response = await axios.post(
-            'https://iam.cloud.ibm.com/identity/token',
-            new URLSearchParams({
-                grant_type: 'urn:ibm:params:oauth:grant-type:apikey',
-                apikey: config.apiKey
-            }),
-            {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                timeout: 20000
-            }
-        );
+        console.log('[Watsonx] Getting access token...');
+        console.log('[Watsonx] API Key starts with:', config.apiKey.substring(0, 10) + '...');
 
-        this.accessToken = response.data.access_token;
-        this.tokenExpiry = Date.now() + (response.data.expires_in * 1000);
-        return this.accessToken!;
+        const axios = require('axios');
+
+        try {
+            const response = await axios.post(
+                'https://iam.cloud.ibm.com/identity/token',
+                new URLSearchParams({
+                    grant_type: 'urn:ibm:params:oauth:grant-type:apikey',
+                    apikey: config.apiKey
+                }),
+                {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    timeout: 20000
+                }
+            );
+
+            this.accessToken = response.data.access_token;
+            this.tokenExpiry = Date.now() + (response.data.expires_in * 1000);
+            console.log('[Watsonx] Token obtained successfully');
+            return this.accessToken!;
+        } catch (error: any) {
+            console.error('[Watsonx] Token error:', error.response?.data || error.message);
+
+            if (error.response?.status === 400) {
+                throw new Error(`Invalid IBM API Key format. Your key "${config.apiKey.substring(0, 15)}..." is not a valid IBM Cloud API key. Go to https://cloud.ibm.com/iam/apikeys to create a new one.`);
+            } else if (error.response?.status === 401) {
+                throw new Error('IBM API Key unauthorized. Please check your API key at https://cloud.ibm.com/iam/apikeys');
+            }
+            throw new Error(`Failed to authenticate with IBM Cloud: ${error.message}`);
+        }
     }
 
     private async queryAgent(systemPrompt: string, userContent: string): Promise<string> {
@@ -154,27 +222,51 @@ export class WatsonAgentService {
         const url = `https://${config.region}.ml.cloud.ibm.com/ml/v1/text/generation?version=2024-01-10`;
         const fullPrompt = `${systemPrompt}\n\nCode:\n\`\`\`\n${userContent}\n\`\`\`\n\nResponse:`;
 
-        const response = await axios.post(url, {
-            model_id: 'ibm/granite-3-8b-instruct',
-            project_id: config.projectId,
-            input: fullPrompt,
-            parameters: {
-                decoding_method: 'greedy',
-                max_new_tokens: 2500,
-                min_new_tokens: 20,
-                repetition_penalty: 1.1,
-                temperature: 0.7
-            }
-        }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            timeout: 60000
-        });
+        console.log('[Watsonx] Calling API at:', url);
+        console.log('[Watsonx] Using project:', config.projectId);
 
-        return response.data.results?.[0]?.generated_text || '';
+        try {
+            const response = await axios.post(url, {
+                model_id: 'ibm/granite-3-8b-instruct',
+                project_id: config.projectId,
+                input: fullPrompt,
+                parameters: {
+                    decoding_method: 'greedy',
+                    max_new_tokens: 2500,
+                    min_new_tokens: 20,
+                    repetition_penalty: 1.1,
+                    temperature: 0.7
+                }
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                timeout: 60000
+            });
+
+            console.log('[Watsonx] API response status:', response.status);
+            return response.data.results?.[0]?.generated_text || '';
+        } catch (error: any) {
+            console.error('[Watsonx] API Error:', error.response?.status, error.response?.data || error.message);
+
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+
+                if (status === 401) {
+                    throw new Error(`401 Unauthorized - API token invalid`);
+                } else if (status === 403) {
+                    throw new Error(`403 Forbidden - ${data?.errors?.[0]?.message || 'Access denied to Watson AI'}`);
+                } else if (status === 404) {
+                    throw new Error(`404 Not Found - Endpoint or project not found`);
+                } else {
+                    throw new Error(`API Error ${status}: ${data?.errors?.[0]?.message || error.message}`);
+                }
+            }
+            throw error;
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -477,6 +569,12 @@ Make sure the code is valid ${language} syntax.`;
     public async generateQuickFix(functionCode: string, functionName: string, errorMessage: string, inputArgs: string[], language: string): Promise<string> {
         console.log('[Watsonx] QUICK FIX:', functionName, 'Error:', errorMessage);
 
+        // First check if Watson is configured
+        const config = this.getConfig();
+        if (!config) {
+            throw new Error('Watson AI is not configured. Please add valid credentials to watson.config.json (ibmApiKey and projectId)');
+        }
+
         const inputDisplay = inputArgs.length > 0 ? inputArgs.join(', ') : '(no input)';
 
         const systemPrompt = `You are an expert ${language} programmer. A function failed with an error.
@@ -498,7 +596,9 @@ Return ONLY the complete fixed function code. No explanations, just the code.
 Make sure the code is valid ${language} syntax.`;
 
         try {
+            console.log('[Watsonx] Calling Watson API for quick fix...');
             const response = await this.queryAgent(systemPrompt, functionCode);
+            console.log('[Watsonx] Got response, length:', response.length);
 
             // Extract code from response
             const codeMatch = response.match(/\`\`\`(?:\w+)?\n?([\s\S]*?)\`\`\`/);
@@ -525,8 +625,268 @@ Make sure the code is valid ${language} syntax.`;
 
             return response.trim();
         } catch (e: any) {
-            console.error('[Watsonx] Quick fix error:', e.message);
-            throw new Error('Failed to generate fix');
+            console.error('[Watsonx] Quick fix error:', e);
+
+            // Provide specific error messages based on the error type
+            if (e.message?.includes('401') || e.message?.includes('Unauthorized')) {
+                throw new Error('IBM Cloud API key is invalid or expired. Please update watson.config.json with a valid API key from https://cloud.ibm.com/iam/apikeys');
+            } else if (e.message?.includes('403') || e.message?.includes('Forbidden')) {
+                throw new Error('Access denied. Your IBM Cloud account may not have access to Watsonx.ai. Please check your account permissions.');
+            } else if (e.message?.includes('404')) {
+                throw new Error('Watson AI endpoint not found. Please check your region setting in watson.config.json');
+            } else if (e.message?.includes('ENOTFOUND') || e.message?.includes('ECONNREFUSED')) {
+                throw new Error('Cannot connect to IBM Cloud. Please check your internet connection.');
+            } else if (e.message?.includes('timeout')) {
+                throw new Error('Watson AI request timed out. Please try again.');
+            } else {
+                throw new Error(`Failed to generate fix: ${e.message || 'Unknown error'}`);
+            }
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // COMPLIANCE CHECK - Government Regulation Compliance Analysis
+    // ═══════════════════════════════════════════════════════════════
+
+    public async checkCompliance(functionCode: string, functionName: string, language: string): Promise<ComplianceResult> {
+        console.log('[Watsonx] COMPLIANCE CHECK:', functionName);
+
+        const config = this.getConfig();
+        if (!config) {
+            // Return a default result if Watson is not configured
+            return {
+                isCompliant: true,
+                overallScore: 100,
+                violations: []
+            };
+        }
+
+        const systemPrompt = `You are a Government Regulation Compliance Expert analyzing ${language} code.
+
+Analyze this function for compliance with these regulations:
+
+1. **GDPR (General Data Protection Regulation)**:
+   - Personal data handling (names, emails, addresses, IPs)
+   - Logging of sensitive user information
+   - Data retention and deletion
+   - User consent requirements
+
+2. **HIPAA (Health Insurance Portability and Accountability Act)**:
+   - Protected Health Information (PHI) handling
+   - Medical records, health data
+   - Encryption requirements for health data
+
+3. **PCI-DSS (Payment Card Industry Data Security Standard)**:
+   - Credit card number handling
+   - CVV, expiration date storage
+   - Payment data encryption
+
+4. **SECURITY Best Practices**:
+   - Hardcoded secrets, API keys, passwords
+   - SQL injection vulnerabilities
+   - XSS vulnerabilities
+   - Input validation
+   - Unsafe deserialization
+
+Return your analysis as valid JSON ONLY (no other text):
+{
+  "isCompliant": true/false,
+  "overallScore": 0-100 (100 = fully compliant),
+  "violations": [
+    {
+      "regulation": "GDPR" | "HIPAA" | "PCI-DSS" | "SECURITY",
+      "issue": "Brief description of the violation",
+      "severity": "low" | "medium" | "high" | "critical",
+      "suggestion": "How to fix this violation"
+    }
+  ]
+}
+
+If the code is fully compliant, return empty violations array and score of 100.`;
+
+        try {
+            const response = await this.queryAgent(systemPrompt, functionCode);
+            console.log('[Watsonx] Compliance response:', response.substring(0, 300));
+
+            const match = response.match(/\{[\s\S]*\}/);
+            if (match) {
+                const parsed = JSON.parse(match[0]);
+                return {
+                    isCompliant: parsed.isCompliant ?? true,
+                    overallScore: parsed.overallScore ?? 100,
+                    violations: parsed.violations ?? []
+                };
+            }
+        } catch (e: any) {
+            console.error('[Watsonx] Compliance check error:', e.message);
+        }
+
+        // Default to compliant if check fails
+        return {
+            isCompliant: true,
+            overallScore: 100,
+            violations: []
+        };
+    }
+
+    public async fixCompliance(functionCode: string, functionName: string, violations: ComplianceViolation[], language: string): Promise<string> {
+        console.log('[Watsonx] FIX COMPLIANCE:', functionName, 'Violations:', violations.length);
+
+        const violationsList = violations.map((v, i) =>
+            `${i + 1}. [${v.regulation}] ${v.issue} (${v.severity})`
+        ).join('\n');
+
+        const systemPrompt = `You are a Government Regulation Compliance Expert.
+
+This ${language} function has the following compliance violations:
+${violationsList}
+
+Rewrite the function to fix ALL violations while keeping the core functionality intact.
+Apply these fixes:
+- For GDPR: Anonymize/hash personal data, add consent checks
+- For HIPAA: Encrypt health data, add access controls
+- For PCI-DSS: Never store CVV, encrypt card data, use tokenization
+- For SECURITY: Remove hardcoded secrets, use parameterized queries, validate inputs
+
+Return ONLY the complete fixed function code. No explanations, just the code.`;
+
+        try {
+            const response = await this.queryAgent(systemPrompt, functionCode);
+
+            // Extract code from response
+            const codeMatch = response.match(/\`\`\`(?:\w+)?\n?([\s\S]*?)\`\`\`/);
+            if (codeMatch) {
+                return codeMatch[1].trim();
+            }
+
+            return response.trim();
+        } catch (e: any) {
+            console.error('[Watsonx] Fix compliance error:', e.message);
+            throw new Error(`Failed to fix compliance: ${e.message}`);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FULL FILE COMPLIANCE CHECK - Scans entire code file at once
+    // ═══════════════════════════════════════════════════════════════
+
+    public async checkFullFileCompliance(fullCode: string, fileName: string, language: string): Promise<ComplianceResult> {
+        console.log('[Watsonx] FULL FILE COMPLIANCE CHECK:', fileName);
+
+        const config = this.getConfig();
+        if (!config) {
+            return {
+                isCompliant: true,
+                overallScore: 100,
+                violations: []
+            };
+        }
+
+        const systemPrompt = `You are a Government Regulation Compliance Expert. Analyze the ENTIRE ${language} code file line by line.
+
+Scan EVERY LINE for compliance violations with:
+
+1. **GDPR (General Data Protection Regulation)**:
+   - Personal data handling (names, emails, addresses, phone numbers, IPs)
+   - Logging sensitive user information without consent
+   - Data retention issues
+   - Missing user consent mechanisms
+
+2. **HIPAA (Health Insurance Portability and Accountability Act)**:
+   - Unencrypted health data (PHI)
+   - Medical records handling
+   - Missing access controls for health data
+
+3. **PCI-DSS (Payment Card Industry Data Security Standard)**:
+   - Credit card numbers stored in plain text
+   - CVV storage (NEVER allowed)
+   - Unencrypted payment data
+
+4. **SECURITY Best Practices**:
+   - Hardcoded API keys, passwords, secrets
+   - SQL injection vulnerabilities
+   - XSS vulnerabilities
+   - Missing input validation
+   - Unsafe file operations
+   - Insecure random number generation
+
+For EACH violation found, include the LINE NUMBER where it occurs.
+
+Return your analysis as valid JSON ONLY:
+{
+  "isCompliant": true/false,
+  "overallScore": 0-100,
+  "violations": [
+    {
+      "regulation": "GDPR" | "HIPAA" | "PCI-DSS" | "SECURITY",
+      "issue": "Description of the violation",
+      "severity": "low" | "medium" | "high" | "critical",
+      "line": LINE_NUMBER,
+      "suggestion": "How to fix this"
+    }
+  ]
+}`;
+
+        try {
+            const response = await this.queryAgent(systemPrompt, fullCode);
+            console.log('[Watsonx] Full file compliance response:', response.substring(0, 300));
+
+            const match = response.match(/\{[\s\S]*\}/);
+            if (match) {
+                const parsed = JSON.parse(match[0]);
+                return {
+                    isCompliant: parsed.isCompliant ?? true,
+                    overallScore: parsed.overallScore ?? 100,
+                    violations: parsed.violations ?? []
+                };
+            }
+        } catch (e: any) {
+            console.error('[Watsonx] Full file compliance error:', e.message);
+        }
+
+        return {
+            isCompliant: true,
+            overallScore: 100,
+            violations: []
+        };
+    }
+
+    public async fixFullFileCompliance(fullCode: string, fileName: string, violations: ComplianceViolation[], language: string): Promise<string> {
+        console.log('[Watsonx] FIX FULL FILE COMPLIANCE:', fileName, 'Violations:', violations.length);
+
+        const violationsList = violations.map((v, i) =>
+            `${i + 1}. Line ${v.line || '?'} [${v.regulation}] ${v.issue} (${v.severity})`
+        ).join('\n');
+
+        const systemPrompt = `You are a Government Regulation Compliance Expert.
+
+This ${language} code file has the following compliance violations:
+${violationsList}
+
+Rewrite the ENTIRE code file to fix ALL violations while keeping ALL functionality intact.
+
+Apply these fixes:
+- For GDPR: Anonymize/hash personal data, add consent mechanisms, use proper logging
+- For HIPAA: Encrypt all health data, add access controls
+- For PCI-DSS: Never store CVV, encrypt card numbers, use tokenization
+- For SECURITY: Use environment variables for secrets, parameterized queries, validate all inputs
+
+Return ONLY the complete fixed code file. Include ALL imports, functions, and code.
+Do NOT add explanations. Return the entire working code file.`;
+
+        try {
+            const response = await this.queryAgent(systemPrompt, fullCode);
+
+            // Extract code from response
+            const codeMatch = response.match(/\`\`\`(?:\w+)?\n?([\s\S]*?)\`\`\`/);
+            if (codeMatch) {
+                return codeMatch[1].trim();
+            }
+
+            return response.trim();
+        } catch (e: any) {
+            console.error('[Watsonx] Fix full file compliance error:', e.message);
+            throw new Error(`Failed to fix compliance: ${e.message}`);
         }
     }
 }

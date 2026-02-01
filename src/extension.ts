@@ -9,19 +9,44 @@ let dashboardPanel: DashboardPanel | undefined;
 const SUPPORTED_LANGUAGES = ['python', 'java', 'go', 'c', 'cpp', 'javascript', 'typescript'];
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Sentinel-Atomic Pro is now active!');
+    console.log('Wisecode AI is now active!');
     console.log('[Extension] Extension path:', context.extensionPath);
 
     setExtensionPath(context.extensionPath);
 
     const openDashboardCommand = vscode.commands.registerCommand(
-        'sentinel.openDashboard',
+        'wisecode.openDashboard',
         () => {
+            console.log('[Extension] Opening dashboard...');
             dashboardPanel = DashboardPanel.createOrShow(context.extensionUri);
 
+            // Try to get the active editor
             const activeEditor = vscode.window.activeTextEditor;
+            console.log('[Extension] Active editor:', activeEditor?.document.fileName);
+
             if (activeEditor && isSupportedLanguage(activeEditor.document)) {
+                console.log('[Extension] Found active editor with supported language');
                 updateDashboard(activeEditor.document);
+            } else {
+                // Try visible text editors
+                console.log('[Extension] No active editor, checking visible editors...');
+                const visibleEditors = vscode.window.visibleTextEditors;
+                for (const editor of visibleEditors) {
+                    if (isSupportedLanguage(editor.document)) {
+                        console.log('[Extension] Found visible editor:', editor.document.fileName);
+                        updateDashboard(editor.document);
+                        return;
+                    }
+                }
+
+                // Retry after a short delay (editor might not be ready yet)
+                setTimeout(() => {
+                    const retryEditor = vscode.window.activeTextEditor;
+                    console.log('[Extension] Retry - Active editor:', retryEditor?.document.fileName);
+                    if (retryEditor && isSupportedLanguage(retryEditor.document)) {
+                        updateDashboard(retryEditor.document);
+                    }
+                }, 500);
             }
         }
     );
