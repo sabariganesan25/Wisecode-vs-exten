@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DashboardPanel } from './panels/DashboardPanel';
+import { SidebarProvider } from './providers/SidebarProvider';
 import { parseFunctions, detectLanguage } from './utilities/pythonParser';
 import { setExtensionPath } from './services/WatsonAgentService';
 
@@ -13,6 +14,11 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('[Extension] Extension path:', context.extensionPath);
 
     setExtensionPath(context.extensionPath);
+
+    const sidebarProvider = new SidebarProvider(context.extensionUri);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider("wisecode.sidebarView", sidebarProvider)
+    );
 
     const openDashboardCommand = vscode.commands.registerCommand(
         'wisecode.openDashboard',

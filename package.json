@@ -25,6 +25,8 @@
     "onLanguage:cpp",
     "onLanguage:javascript",
     "onLanguage:typescript",
+    "onLanguage:typescript",
+    "onView:wisecode.sidebarView",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -35,6 +37,24 @@
         "title": "Wisecode: Open Dashboard"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "wisecode-activitybar",
+          "title": "Wisecode AI",
+          "icon": "images/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "wisecode-activitybar": [
+        {
+          "id": "wisecode.sidebarView",
+          "name": "Wisecode AI",
+          "type": "webview"
+        }
+      ]
+    },
     "configuration": {
       "title": "Wisecode AI",
       "properties": {
