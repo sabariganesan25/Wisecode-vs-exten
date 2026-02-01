@@ -20,7 +20,12 @@ Enterprise-grade AI security agent for automated code compliance, auditing, and 
 
 ## Configuration
 
-Add your IBM Watsonx credentials to `watson.config.json` or `.env`.
+1. Go to **File -> Preferences -> Settings** (or split `Ctrl+,`).
+2. Search for "Wisecode".
+3. Enter your **IBM Cloud API Key** and **Project ID**.
+4. (Optional) Select your region (default: `us-south`).
+
+Alternatively, you can use a `.env` file in the extension root, but Settings are recommended.
 
 ## License
 

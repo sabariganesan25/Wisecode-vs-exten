@@ -104,7 +104,23 @@ export class WatsonAgentService {
 
         console.log('[Watsonx] Looking for config. Extension path:', extensionPath);
 
-        // 1. Try .env file first
+        // 1. Try VS Code Settings first (Standard for Extensions)
+        const config = vscode.workspace.getConfiguration('wisecode');
+        const settingsApiKey = config.get<string>('ibmApiKey');
+        const settingsProjectId = config.get<string>('projectId');
+        const settingsRegion = config.get<string>('region');
+
+        if (settingsApiKey && settingsProjectId) {
+            console.log('[Watsonx] Config loaded from VS Code Settings');
+            this.cachedConfig = {
+                apiKey: settingsApiKey,
+                projectId: settingsProjectId,
+                region: settingsRegion || 'us-south'
+            };
+            return this.cachedConfig;
+        }
+
+        // 2. Try .env file
         const envPath = path.join(extensionPath, '.env');
         if (fs.existsSync(envPath)) {
             console.log('[Watsonx] Found .env at:', envPath);
