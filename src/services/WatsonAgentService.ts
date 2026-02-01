@@ -367,13 +367,16 @@ Return your response as valid JSON only:
             const match = response.match(/\{[\s\S]*\}/);
             if (match) return JSON.parse(match[0]);
         } catch (e: any) {
-            console.error('[Watsonx] Guide error:', e);
+            console.error('[Watsonx] Guide error:', e.message);
+            vscode.window.showWarningMessage(
+                `Watson AI: ${e.message}. Check your IBM credentials in Settings.`
+            );
         }
         // Fallback: Return meaningful default instead of crashing UI
         return {
-            summary: 'Unable to generate guide - API error or timeout. Please try again.',
-            workflow: [{ step: 1, function: 'N/A', description: 'Unable to analyze workflow. Try refreshing.' }],
-            dependencies: ['Unable to detect dependencies.']
+            summary: '⚠️ Watson API error - Please configure your IBM Watsonx credentials in VS Code Settings.',
+            workflow: [{ step: 1, function: 'Settings', description: 'Go to Settings > Search "wisecode" > Enter your IBM API Key and Project ID' }],
+            dependencies: ['IBM API Key (wisecode.ibmApiKey)', 'Watsonx Project ID (wisecode.projectId)']
         };
     }
 
@@ -397,14 +400,18 @@ Return as valid JSON only:
             const match = response.match(/\{[\s\S]*\}/);
             if (match) return JSON.parse(match[0]);
         } catch (e: any) {
-            console.error('[Watsonx] Summary error:', e);
+            console.error('[Watsonx] Summary error:', e.message);
+            // Show notification so user knows API is failing
+            vscode.window.showWarningMessage(
+                `Watson AI: ${e.message}. Check your IBM credentials in Settings (wisecode.ibmApiKey).`
+            );
         }
         // Fallback: Return meaningful default instead of crashing UI
         return {
-            purpose: 'Unable to summarize - API error or timeout. Please try again.',
-            inputs: 'See function parameters.',
-            outputs: 'See function return statement.',
-            complexity: 'Unable to analyze.'
+            purpose: '⚠️ Watson API error - Please check your IBM API Key and Project ID in VS Code Settings.',
+            inputs: 'Configure: wisecode.ibmApiKey, wisecode.projectId in Settings',
+            outputs: 'Ensure your IBM Watsonx project has text generation models enabled.',
+            complexity: 'Visit https://cloud.ibm.com/iam/apikeys to verify credentials.'
         };
     }
 

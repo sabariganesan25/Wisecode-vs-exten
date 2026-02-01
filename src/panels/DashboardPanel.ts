@@ -327,11 +327,14 @@ export class DashboardPanel {
 
         try {
             const summary = await watsonService.summarizeFunction(functionCode, functionName);
+            console.log('[Dashboard] Summary result:', summary);
             this._panel.webview.postMessage({
                 type: 'summarizeResult',
                 payload: { requestId, success: true, summary }
             });
         } catch (error: any) {
+            console.error('[Dashboard] Summarize error:', error.message);
+            vscode.window.showWarningMessage(`Summarize failed: ${error.message}`);
             this._panel.webview.postMessage({
                 type: 'summarizeResult',
                 payload: { requestId, success: false, error: error.message }
@@ -345,18 +348,22 @@ export class DashboardPanel {
 
     private async _handleGenerateGuide(requestId: string): Promise<void> {
         console.log('[Dashboard] Generating guide...');
+        console.log('[Dashboard] File content length:', this._currentFileContent?.length || 0);
 
         try {
             const guide = await watsonService.generateGuide(
                 this._currentFileContent,
                 path.basename(this._currentFilePath)
             );
+            console.log('[Dashboard] Guide result:', guide);
 
             this._panel.webview.postMessage({
                 type: 'guideResult',
                 payload: { requestId, success: true, guide }
             });
         } catch (error: any) {
+            console.error('[Dashboard] Guide error:', error.message);
+            vscode.window.showWarningMessage(`Guide generation failed: ${error.message}`);
             this._panel.webview.postMessage({
                 type: 'guideResult',
                 payload: { requestId, success: false, error: error.message }
